@@ -1,5 +1,6 @@
 ﻿using Simulation.Entities.Characters;
 using System.Xml.Linq;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Simulation.Entities.Locations;
 
@@ -35,6 +36,18 @@ public class SpaceShip : Location
         Parking = station;
 
         station.parkedShips.Add(this);
+
+        return true;
+    }
+
+    public bool TakeOff()
+    {
+        if (Parking is null) 
+        { 
+            return false;
+        }
+        Parking.parkedShips.Remove(this);
+        Parking = null;
 
         return true;
     }
