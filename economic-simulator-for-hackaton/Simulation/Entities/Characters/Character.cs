@@ -61,8 +61,7 @@ public class Character : Actor
             var ship = (SpaceShip)Place;
             if(ship.Parking is not null)
             {
-                ship.cargos.Remove(Cargo);
-                ship.Parking.cargos.Add(Cargo);
+                Cargo.TransitToNewLocation(ship, ship.Parking);
                 return true;
             }
         }
@@ -76,8 +75,7 @@ public class Character : Actor
             var station = (SpaceStation)Place;
             if (ship.Parking == station)
             {
-                station.cargos.Remove(Cargo);
-                ship.cargos.Add(Cargo);
+                Cargo.TransitToNewLocation(station, ship);
                 return true;
             }
         }

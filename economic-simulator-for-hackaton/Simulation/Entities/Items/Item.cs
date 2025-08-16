@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Simulation.Entities.Locations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,4 +32,23 @@ public class Item
         }
     }
 
+    public void TransitToNewLocation(Location? oldLocation, Location location)
+    {
+        if(oldLocation is not null)
+        {
+            oldLocation.cargos.Remove(this);
+        }
+
+        var identicalCargo = location.cargos
+        .FirstOrDefault(c => c.Owner == Owner && c.Type == Type);
+
+        if (identicalCargo != null)
+        {
+            identicalCargo.Quantity += this.Quantity;
+        }
+        else
+        {
+            location.cargos.Add(this);
+        }
+    }
 }
