@@ -33,4 +33,9 @@ public class Simulator
             await FinishDay();
         }
     }
+
+    public SpaceStation? GetStationByCoord(uint x, uint y)
+    {
+         return spaceStations.FirstOrDefault(s => s.coordX == x && s.coordY == y);
+    }
 }

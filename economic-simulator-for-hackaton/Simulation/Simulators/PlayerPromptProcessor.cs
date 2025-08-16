@@ -29,6 +29,8 @@ public class PlayerPromptProcessor
                 return player.Place?.View() ?? "Пустота и ничего более";
             case "сойти":
                 return await ProcessDisEmbarkCommand(player, words);
+            case "посадка":
+                return await ProcessLandCommand(player, words);
             default:
                 return "команда не распознана";
         }
@@ -38,7 +40,7 @@ public class PlayerPromptProcessor
 
     public async Task<string> ProcessDisEmbarkCommand(PLayer pLayer, string[] words)
     {
-        if(pLayer.Place is null)
+        if (pLayer.Place is null)
         {
             return "Вы находитесь нигде, вам некуда сойти  и не с чего";
         }
@@ -49,7 +51,7 @@ public class PlayerPromptProcessor
         if (pLayer.Place is SpaceShip)
         {
             var ship = pLayer.Place as SpaceShip;
-            if (ship.Parking is not null) 
+            if (ship.Parking is not null)
             {
                 if (pLayer.Disembark())
                 {
@@ -59,11 +61,50 @@ public class PlayerPromptProcessor
                 {
                     return $"Не удалось сойти на станцию";
                 }
-            }else
+            }
+            else
             {
                 return "Ваш корабль не сел на поверхность станции, он в открытом космосе, сойти невозможно";
-            }    
+            }
         }
         return "Тут не сойти";
+    }
+
+    public async Task<string> ProcessLandCommand(PLayer pLayer, string[] words)
+    {
+        if (pLayer.Place is null)
+        {
+            return "Вы находитесь нигде, не на корабле";
+        }
+        if (pLayer.Place is SpaceStation)
+        {
+            return "Вы находитесь на станции, станции не летают";
+        }
+        if (pLayer.Place is SpaceShip)
+        {
+            var ship = pLayer.Place as SpaceShip;
+            if (ship.Captain != pLayer)
+            {
+                return "Вы не капитан этого корабля, вы не можете отдавать приказ на посадку";
+            }
+
+            if (ship.Parking is not null)
+            {
+                return "Корабль уже посажен";
+            }
+
+            var station = _simulator.GetStationByCoord(ship.coordX, ship.coordY);
+            if (station is null)
+            {
+                return "Рядом нет станции для посадки";
+            }
+            if (ship.Land(station))
+            {
+                return "Посадка завершена успешно";
+
+            }
+            return "Посадка не удалась";
+        }
+        return "Это не корабль, на котором можно влететь";
     }
 }
