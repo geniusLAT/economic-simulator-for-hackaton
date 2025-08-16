@@ -54,6 +54,38 @@ public class Character : Actor
         return false;
     }
 
+    public bool Unload(Item Cargo, uint quantityToUnload)
+    {
+        if(Cargo.Quantity < quantityToUnload)
+        {
+            return false;
+        }
+
+        if (Cargo.Quantity == quantityToUnload)
+        {
+            return Unload(Cargo);
+        }
+
+        if (Place is SpaceShip)
+        {
+            var ship = (SpaceShip)Place;
+            if (ship.Parking is not null)
+            {
+                Cargo.Quantity -= quantityToUnload;
+
+                var newCargo = new Item()
+                {
+                    Owner = Cargo.Owner,
+                    Type = Cargo.Type,
+                    Quantity = quantityToUnload
+                };
+                newCargo.TransitToNewLocation(null, ship.Parking);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool Unload(Item Cargo)
     {
         if (Place is SpaceShip)
