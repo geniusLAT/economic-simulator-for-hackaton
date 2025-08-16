@@ -4,9 +4,9 @@ namespace economic_simulator_for_hackaton.Controllers;
 
 public class MessageService : IMessageService
 {
-    public string GetResponse(string text)
+    public string GetResponse(Guid playerCharacterUuid, string text)
     {
 
-        return $"Принято: {text}";
+        return $"Received: {text}";
     }
 }
