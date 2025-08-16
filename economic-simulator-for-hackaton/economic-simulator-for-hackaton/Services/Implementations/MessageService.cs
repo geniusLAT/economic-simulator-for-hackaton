@@ -1,6 +1,6 @@
 ﻿using economic_simulator_for_hackaton.Services.Interfaces;
 
-namespace economic_simulator_for_hackaton.Controllers;
+namespace economic_simulator_for_hackaton.Services.Implementations;
 
 public class MessageService : IMessageService
 {

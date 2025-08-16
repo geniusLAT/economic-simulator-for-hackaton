@@ -1,6 +1,6 @@
 ﻿using economic_simulator_for_hackaton;
 
-namespace WebServiceTests.ProgramTests
+namespace WebServiceTests.WebServiceTests
 {
     public class ExecuteAsyncTests
     {
