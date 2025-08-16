@@ -29,6 +29,8 @@ public class PlayerPromptProcessor
                 return player.Place?.View() ?? "Пустота и ничего более";
             case "сойти":
                 return await ProcessDisEmbarkCommand(player, words);
+            case "подняться":
+                return await ProcessDisEmbarkCommand(player, words);
             case "посадка":
                 return await ProcessLandCommand(player, words);
             case "взлёт":

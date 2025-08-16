@@ -24,6 +24,14 @@ public class Simulator
         {
             character.Do();
         }
+
+        foreach (var station in spaceStations)
+        {
+            foreach (var offer in station.localOffers)
+            {
+                offer.UpdatePrice();
+            }
+        }
     }
 
     public async Task SkipDays(uint days)

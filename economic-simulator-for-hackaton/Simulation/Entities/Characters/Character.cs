@@ -68,4 +68,19 @@ public class Character : Actor
         }
         return false;
     }
+
+    public bool Load(Item Cargo, SpaceShip ship)
+    {
+        if (Place is SpaceStation)
+        {
+            var station = (SpaceStation)Place;
+            if (ship.Parking == station)
+            {
+                station.cargos.Remove(Cargo);
+                ship.cargos.Add(Cargo);
+                return true;
+            }
+        }
+        return false;
+    }
 }
