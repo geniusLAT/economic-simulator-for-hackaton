@@ -20,7 +20,7 @@ public class TableDrawer
         _list.Add(line);
     }
 
-    public string Draw()
+    public string Draw(bool separator=false)
     {
         var min = _list[0].Count;
         Console.WriteLine($"first line contains {min} elements");
@@ -65,6 +65,17 @@ public class TableDrawer
                 sb.Append('|');
             }
             sb.Append('\n');
+
+            if(separator && rowIndex == 0)
+            {
+                sb.Append('|');
+                for (int elementInLineIndex = 0; elementInLineIndex < min; elementInLineIndex++)
+                {
+                    sb.Append(new string('-', maxCharsInColumns[elementInLineIndex]));
+                    sb.Append('|');
+                }
+                    sb.Append('\n');
+            }
         }
         Console.Write($" \n\n");
         return sb.ToString();

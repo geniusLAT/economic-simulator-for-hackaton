@@ -1,4 +1,6 @@
-﻿namespace Simulation.Entities.Locations;
+﻿using Simulation.Utilities;
+
+namespace Simulation.Entities.Locations;
 
 public class SpaceStation : Location
 {
@@ -36,12 +38,21 @@ public class SpaceStation : Location
             return result ;
         }
 
-        result += $"\tНаименование товара \t вид предложения \t цена за штуку \t верхний предел товара \t Автор предложения\n";
-        
-        foreach (var offer in localOffers)
+        var drawer = new TableDrawer();
+        drawer.AddLine(new List<string>() {
+            "Номер",
+        "Наименование товара",
+        "вид предложения",
+        "цена за штуку",
+        "верхний предел товара",
+        "Автор предложения"
+        });
+
+        for (int i = 0; i < localOffers.Count; i++)
         {
-            result += $"{offer}\n";
+            Offer? offer = localOffers[i];
+            drawer.AddLine(offer.ToStringList(i));
         }
-        return result ;
+        return result + drawer.Draw(true);
     }
 }

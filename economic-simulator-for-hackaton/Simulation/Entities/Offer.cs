@@ -33,4 +33,29 @@ public class Offer
         ///////$"Наименование товара \t вид предложения \t цена за штуку \t верхний предел товара \t Автор предложения"; 
         return $"\t{Item.TypeToString(ItemType)}|\t {typeStr}|\t {pricePerOne}|\t { BorderStr}|\t {Offerer.Name}";
     }
+
+    public List<string> ToStringList(int index)
+    {
+        var typeStr = "продаёт";
+        if (IsOffererSelling)
+        {
+            typeStr = "скупает";
+        }
+        var BorderStr = "-";
+        if (Border is not null)
+        {
+            BorderStr = Border.ToString();
+        }
+        ///////$"Наименование товара \t вид предложения \t цена за штуку \t верхний предел товара \t Автор предложения"; 
+        return new List<string>()
+        {
+            index.ToString(),
+            Item.TypeToString(ItemType),
+            typeStr,
+            pricePerOne.ToString(),
+            BorderStr,
+            Offerer.Name,
+
+        };
+    }
 }
