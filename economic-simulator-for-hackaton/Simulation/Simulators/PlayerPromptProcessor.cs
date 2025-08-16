@@ -31,6 +31,10 @@ public class PlayerPromptProcessor
                 return await ProcessDisEmbarkCommand(player, words);
             case "посадка":
                 return await ProcessLandCommand(player, words);
+            case "взлёт":
+                return await ProcessTakeOffCommand(player, words);
+            case "взлет":
+                return await ProcessTakeOffCommand(player, words);
             default:
                 return "команда не распознана";
         }
@@ -106,5 +110,38 @@ public class PlayerPromptProcessor
             return "Посадка не удалась";
         }
         return "Это не корабль, на котором можно влететь";
+    }
+
+    public async Task<string> ProcessTakeOffCommand(PLayer pLayer, string[] words)
+    {
+        if (pLayer.Place is null)
+        {
+            return "Вы находитесь нигде, не на корабле";
+        }
+        if (pLayer.Place is SpaceStation)
+        {
+            return "Вы находитесь на станции, станции не летают";
+        }
+        if (pLayer.Place is SpaceShip)
+        {
+            var ship = pLayer.Place as SpaceShip;
+            if (ship.Captain != pLayer)
+            {
+                return "Вы не капитан этого корабля, вы не можете отдавать приказ на взлёт";
+            }
+
+            if (ship.Parking is null)
+            {
+                return "Корабль не посажен, он не может взлететь";
+            }
+
+            if (ship.TakeOff())
+            {
+                return "Взлёт завершен успешно";
+
+            }
+            return "Взлёт не удался";
+        }
+        return "Это не корабль, на котором можно взлететь";
     }
 }
