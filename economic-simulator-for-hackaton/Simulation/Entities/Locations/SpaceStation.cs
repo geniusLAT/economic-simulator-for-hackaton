@@ -4,6 +4,8 @@ public class SpaceStation : Location
 {
     public List<SpaceShip> parkedShips { get; set; } = [];
 
+    public List<Offer> localOffers { get; set; } = [];
+
     public uint MaxLevelOfMining { get; set; } = 0;
 
     public uint MaxLevelOfFuel { get; set; } = 0;
@@ -21,8 +23,25 @@ public class SpaceStation : Location
             SunnyString = "Да";
         }
         result += $"Пригодность для синтеза еды: {SunnyString}\n";
-
+        result += OfferView();
 
         return result;
+    }
+
+    public string OfferView()
+    {
+        var result = $"Торговых предложений: {localOffers.Count}\n";
+        if (localOffers.Count < 1)
+        {
+            return result ;
+        }
+
+        result += $"\tНаименование товара \t вид предложения \t цена за штуку \t верхний предел товара \t Автор предложения\n";
+        
+        foreach (var offer in localOffers)
+        {
+            result += $"{offer}\n";
+        }
+        return result ;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Simulation.Entities.Characters;
+﻿using Simulation.Entities;
+using Simulation.Entities.Characters;
 using Simulation.Entities.Locations;
 using Simulation.Simulators;
 
@@ -117,8 +118,55 @@ public class ProcessPromptTests
 Уровень пригодности для добычи руды: 0
 Уровень пригодности для добычи топлива: 0
 Пригодность для синтеза еды: Нет
+Торговых предложений: 0
 ";
         Assert.That(result, Is.EqualTo(expected.Replace("\r","")));
+    }
+
+    [Test]
+    public async Task ProcessPrompt_PlayerViewAtStationWithOffers()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var pLayer = new PLayer()
+        {
+            Name = "Joe Doe",
+            Place = station
+        };
+
+        _simulator.Characters.Add(pLayer);
+        _simulator.PLayerCharacters.Add(pLayer);
+
+        var offer = new Offer()
+        { 
+            Offerer = pLayer,
+            IsOffererSelling = false,
+            ItemType = Simulation.Entities.Items.ItemType.food,
+            pricePerOne = 10
+        };
+        station.localOffers.Add(offer);
+
+        //Act
+        var result = await _playerPromptProcessor.ProcessPromptAsync("осмотр", pLayer.Guid);
+
+        //Assert
+        Console.WriteLine(result);
+
+        var expected = @"Станция называется Zeus II, находится по координатам 0, 0
+Уровень пригодности для добычи руды: 0
+Уровень пригодности для добычи топлива: 0
+Пригодность для синтеза еды: Нет
+Торговых предложений: 0
+";
+        Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
     }
 
     [Test]

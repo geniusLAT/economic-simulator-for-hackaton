@@ -2,5 +2,5 @@
 
 public interface IBehavior
 {
-    public void Do();
+    public void Do(Character me);
 }

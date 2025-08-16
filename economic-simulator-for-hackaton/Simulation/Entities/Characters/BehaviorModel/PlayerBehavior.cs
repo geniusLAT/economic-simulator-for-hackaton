@@ -2,7 +2,7 @@
 
 public class PlayerBehavior : IBehavior
 {
-    public void Do()
+    public void Do(Character me)
     {
         //Player don't need AI behavior
     }

@@ -1,4 +1,5 @@
 ﻿using Simulation.Entities.Characters.BehaviorModel;
+using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
 
 namespace Simulation.Entities.Characters;
@@ -11,7 +12,18 @@ public class Character : Actor
 
     public void Do()
     {
-        
+
+    }
+
+    public bool PublishOffer(Offer offer)
+    {
+        if (Place is SpaceStation)
+        {
+            var station = (SpaceStation)Place;
+            station.localOffers.Add(offer);
+            return true;
+        }
+        return false;
     }
 
     public bool Disembark()
@@ -22,6 +34,21 @@ public class Character : Actor
             if (ship.Parking is not null)
             {
                 Place = ship.Parking;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool Unload(Item Cargo)
+    {
+        if (Place is SpaceShip)
+        {
+            var ship = (SpaceShip)Place;
+            if(ship.Parking is not null)
+            {
+                ship.cargos.Remove(Cargo);
+                ship.Parking.cargos.Add(Cargo);
                 return true;
             }
         }
