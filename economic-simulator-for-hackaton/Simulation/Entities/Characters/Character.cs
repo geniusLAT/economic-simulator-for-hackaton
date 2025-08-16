@@ -13,4 +13,18 @@ public class Character : Actor
     {
         
     }
+
+    public bool Disembark()
+    {
+        if (Place is SpaceShip)
+        {
+            var ship = (SpaceShip)Place;
+            if (ship.Parking is not null)
+            {
+                Place = ship.Parking;
+                return true;
+            }
+        }
+        return false;
+    }
 }

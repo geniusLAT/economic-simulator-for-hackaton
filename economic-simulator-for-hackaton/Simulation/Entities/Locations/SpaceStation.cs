@@ -2,7 +2,7 @@
 
 public class SpaceStation : Location
 {
-   
+    public List<SpaceShip> parkedShips { get; set; } = [];
 
     public uint MaxLevelOfMining { get; set; } = 0;
 

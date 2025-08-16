@@ -27,4 +27,15 @@ public class SpaceShip : Location
 
         return result;
     }
+
+    public bool Land(SpaceStation station)
+    {
+        coordX = station.coordX;
+        coordY = station.coordY;
+        Parking = station;
+
+        station.parkedShips.Add(this);
+
+        return true;
+    }
 }
