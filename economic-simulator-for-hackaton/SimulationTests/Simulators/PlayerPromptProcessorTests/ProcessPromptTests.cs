@@ -119,6 +119,7 @@ public class ProcessPromptTests
 Уровень пригодности для добычи топлива: 0
 Пригодность для синтеза еды: Нет
 Торговых предложений: 0
+Кораблей припарковано: 0
 ";
         Assert.That(result, Is.EqualTo(expected.Replace("\r","")));
     }
@@ -167,7 +168,75 @@ public class ProcessPromptTests
 Торговых предложений: 1
 |Номер|Наименование товара|вид предложения|цена за штуку|верхний предел товара|Автор предложения|
 |-----|-------------------|---------------|-------------|---------------------|-----------------|
-|0    |Продовольствие     |продаёт        |10           |1                    |Joe Doe          |
+|1    |Продовольствие     |продаёт        |10           |1                    |Joe Doe          |
+Кораблей припарковано: 0
+";
+        Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
+    }
+
+
+    [Test]
+    public async Task ProcessPrompt_PlayerViewAtStationWithOffersAndShips()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var pLayer = new PLayer()
+        {
+            Name = "Joe Doe",
+            Place = station
+        };
+
+        _simulator.Characters.Add(pLayer);
+        _simulator.PLayerCharacters.Add(pLayer);
+
+        var offer = new Offer()
+        {
+            Offerer = pLayer,
+            IsOffererSelling = false,
+            ItemType = Simulation.Entities.Items.ItemType.food,
+            pricePerOne = 10
+        };
+        station.localOffers.Add(offer);
+
+        var ship = new SpaceShip()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Pegasus",
+            Captain = pLayer,
+            Owner = pLayer,
+            Parking = station
+        };
+        _simulator.spaceShips.Add(ship);
+
+        station.parkedShips.Add(ship);
+
+        //Act
+        var result = await _playerPromptProcessor.ProcessPromptAsync("осмотр", pLayer.Guid);
+
+        //Assert
+        Console.WriteLine(result);
+
+        var expected = @"Станция называется Zeus II, находится по координатам 0, 0
+Уровень пригодности для добычи руды: 0
+Уровень пригодности для добычи топлива: 0
+Пригодность для синтеза еды: Нет
+Торговых предложений: 1
+|Номер|Наименование товара|вид предложения|цена за штуку|верхний предел товара|Автор предложения|
+|-----|-------------------|---------------|-------------|---------------------|-----------------|
+|1    |Продовольствие     |продаёт        |10           |1                    |Joe Doe          |
+Кораблей припарковано: 1
+|Номер|Название судна|Владелец|Капитан|
+|-----|--------------|--------|-------|
+|1    |Pegasus       |Joe Doe |Joe Doe|
 ";
         Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
     }

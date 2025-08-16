@@ -74,6 +74,52 @@ public class PlayerPromptProcessor
         return "Тут не сойти";
     }
 
+    public async Task<string> ProcessEmbarkCommand(PLayer pLayer, string[] words)
+    {
+        if (pLayer.Place is null)
+        {
+            return "Вы находитесь нигде, вам некуда сойти  и не с чего";
+        }
+        if (pLayer.Place is SpaceShip)
+        {
+            return "Вы уже находитесь на корабле, у вас нет возможности подняться на корабля, пока вы на корабле";
+        }
+        if (pLayer.Place is SpaceStation)
+        {
+            var station = pLayer.Place as SpaceStation;
+            if(words.Length <2)
+            {
+                return "Вы не указали номер корабля для подъёма";
+            }
+
+            if (!int.TryParse(words[1], out int shipNumber))
+            {
+                return $"{words[1]} - некорректный номер корабля";
+            }
+
+            if (shipNumber < 1)
+            {
+                return $"{words[1]} - некорректный номер корабля, нумерация начинается с 1";
+            }
+
+            var trueShipNumber = shipNumber - 1;
+            if (trueShipNumber >= station.parkedShips.Count)
+            {
+                return $"Корабль с таким индексом не найден, осмотритесь, чтобы найти индексы кораблей";
+            }
+
+            if (pLayer.Embark(station.parkedShips[trueShipNumber]))
+            {
+                return $"Вы поднимаетесь на борт {station.parkedShips[trueShipNumber].Name}";
+            }
+            else
+            {
+                return $"Подняться на борт не удалось";
+            }
+        }
+        return "Тут не сойти";
+    }
+
     public async Task<string> ProcessLandCommand(PLayer pLayer, string[] words)
     {
         if (pLayer.Place is null)

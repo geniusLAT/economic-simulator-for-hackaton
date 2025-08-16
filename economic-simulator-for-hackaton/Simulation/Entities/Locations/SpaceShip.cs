@@ -1,4 +1,5 @@
 ﻿using Simulation.Entities.Characters;
+using Simulation.Entities.Items;
 using System.Xml.Linq;
 using static System.Collections.Specialized.BitVector32;
 
@@ -50,5 +51,17 @@ public class SpaceShip : Location
         Parking = null;
 
         return true;
+    }
+
+    public List<string> ToStringList(int index)
+    {
+        ///////$"Наименование товара \t вид предложения \t цена за штуку \t верхний предел товара \t Автор предложения"; 
+        return new List<string>()
+        {
+            index.ToString(),
+            Name,
+            Owner.Name,
+            Captain.Name,
+        };
     }
 }

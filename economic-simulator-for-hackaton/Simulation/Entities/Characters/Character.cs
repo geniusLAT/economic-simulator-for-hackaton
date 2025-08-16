@@ -40,6 +40,20 @@ public class Character : Actor
         return false;
     }
 
+    public bool Embark(SpaceShip ship)
+    {
+        if (Place is SpaceStation)
+        {
+            var station = (SpaceStation)Place;
+            if (ship.Parking == station)
+            {
+                Place = ship;
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool Unload(Item Cargo)
     {
         if (Place is SpaceShip)

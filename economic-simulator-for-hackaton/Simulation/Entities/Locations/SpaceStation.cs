@@ -26,6 +26,7 @@ public class SpaceStation : Location
         }
         result += $"Пригодность для синтеза еды: {SunnyString}\n";
         result += OfferView();
+        result += ShipsView();
 
         return result;
     }
@@ -51,7 +52,30 @@ public class SpaceStation : Location
         for (int i = 0; i < localOffers.Count; i++)
         {
             Offer? offer = localOffers[i];
-            drawer.AddLine(offer.ToStringList(i));
+            drawer.AddLine(offer.ToStringList(i+1));
+        }
+        return result + drawer.Draw(true);
+    }
+
+    public string ShipsView()
+    {
+        var result = $"Кораблей припарковано: {parkedShips.Count}\n";
+        if (parkedShips.Count < 1)
+        {
+            return result;
+        }
+
+        var drawer = new TableDrawer();
+        drawer.AddLine(new List<string>() {
+            "Номер",
+        "Название судна",
+        "Владелец",
+        "Капитан"
+        });
+
+        for (int i = 0; i < parkedShips.Count; i++)
+        {
+            drawer.AddLine(parkedShips[i].ToStringList(i+1));
         }
         return result + drawer.Draw(true);
     }
