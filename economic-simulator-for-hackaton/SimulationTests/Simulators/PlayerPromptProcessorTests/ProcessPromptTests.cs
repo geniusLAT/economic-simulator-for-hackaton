@@ -113,11 +113,59 @@ public class ProcessPromptTests
         //Assert
         Console.WriteLine(result);
 
-        var expected = @"Станция называется Zeus II, находится по координатам 0 0
+        var expected = @"Станция называется Zeus II, находится по координатам 0, 0
 Уровень пригодности для добычи руды: 0
 Уровень пригодности для добычи топлива: 0
 Пригодность для синтеза еды: Нет
 ";
         Assert.That(result, Is.EqualTo(expected.Replace("\r","")));
+    }
+
+    [Test]
+    public async Task ProcessPrompt_PlayerViewAtSpaceShip()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var pLayer = new PLayer()
+        {
+            Name = "Joe Doe"
+        };
+
+        _simulator.Characters.Add(pLayer);
+        _simulator.PLayerCharacters.Add(pLayer);
+
+        var ship = new SpaceShip()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Pegasus",
+            Captain = pLayer,
+            Owner = pLayer,
+            Parking = station
+        };
+        _simulator.spaceShips.Add(ship);
+
+        pLayer.Place = ship;
+
+        //Act
+        var result = await _playerPromptProcessor.ProcessPromptAsync("осмотр", pLayer.Guid);
+
+        //Assert
+        Console.WriteLine(result);
+
+        var expected = @"Корабль называется Pegasus, находится по координатам 0, 0
+Владелец: Joe Doe
+Капитан: Joe Doe
+Посажен на станции Zeus II
+";
+        Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
     }
 }

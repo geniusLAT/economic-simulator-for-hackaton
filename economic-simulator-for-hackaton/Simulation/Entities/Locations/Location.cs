@@ -4,6 +4,8 @@ namespace Simulation.Entities.Locations;
 
 public abstract class Location
 {
+    public string Name { get; set; } = "Новая";
+
     public uint coordX { get; set; }
 
     public uint coordY { get; set; }

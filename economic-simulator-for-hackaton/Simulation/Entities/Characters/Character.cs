@@ -9,8 +9,6 @@ public class Character : Actor
 
     public IBehavior Behavior { get; set; }
 
-    public string Name { get; set; }
-
     public void Do()
     {
         
