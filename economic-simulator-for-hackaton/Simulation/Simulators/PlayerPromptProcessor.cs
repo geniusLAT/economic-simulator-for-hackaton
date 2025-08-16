@@ -47,6 +47,100 @@ public class PlayerPromptProcessor
         return "ошибка";
     }
 
+    public async Task<string> ProcessLoadCommand(PLayer player, string[] words)
+    {
+        if (player.Place is null)
+        {
+            return "Вы находитесь нигде, тут нет груза";
+        }
+        if (player.Place is SpaceShip )
+        {
+            return "Чтобы загружать корабль надо быть. Вы находитесь на корабле." +
+                " У вас есть возможность рагружать";
+        }
+        if (player.Place is SpaceStation)
+        {
+            var station = player.Place as SpaceStation;
+
+            if (words.Length < 2)
+            {
+                return "Вы не указали номер корабля для выгрузки";
+            }
+
+            if (!int.TryParse(words[1], out int shipNumber))
+            {
+                return $"{words[1]} - некорректный номер корабля";
+            }
+
+            if (shipNumber < 1)
+            {
+                return $"{words[1]} - некорректный номер корабля, нумерация начинается с 1";
+            }
+
+            var trueShipNumber = shipNumber - 1;
+            if (trueShipNumber >= station.parkedShips.Count)
+            {
+                return $"корабль с таким индексом не найден, осмотритесь, чтобы найти индексы грузов";
+            }
+            var ship = station.parkedShips[trueShipNumber];
+
+            if (!int.TryParse(words[2], out int cargoNumber))
+            {
+                return $"{words[2]} - некорректный номер груза";
+            }
+
+            if (cargoNumber < 1)
+            {
+                return $"{words[2]} - некорректный номер груза, нумерация начинается с 1";
+            }
+
+            var trueCargoNumber = cargoNumber - 1;
+            if (trueCargoNumber >= station.cargos.Count)
+            {
+                return $"груз с таким индексом не найден, осмотритесь, чтобы найти индексы грузов";
+            }
+
+            if (words.Length == 3)
+            {
+                if (player.Load(station.cargos[trueCargoNumber], ship))
+                {
+
+                    return $"Груз загружен";
+                }
+                else
+                {
+                    return $"Загрузить груз не удалось";
+                }
+            }
+
+            if (!int.TryParse(words[3], out int quantityToLoad))
+            {
+                return $"{words[3]} - некорректное количество груза";
+            }
+
+            if (quantityToLoad < 1)
+            {
+                return "Количество груза должно быть положительным";
+            }
+
+            if (quantityToLoad > station.cargos[trueCargoNumber].Quantity)
+            {
+                return $"Количество груза на cтанции равно {station.cargos[trueCargoNumber].Quantity}, " +
+                    $"нельзя зарузить  {quantityToLoad} единиц, это больше чем имеется на cтанции";
+            }
+
+            if (player.Load(station.cargos[trueCargoNumber], ship, (uint)quantityToLoad))
+            {
+                return $"Груз загружен";
+            }
+            else
+            {
+                return $"Загрузить груз не удалось";
+            }
+        }
+        return "Тут не разгрузить";
+    }
+
     public async Task<string> ProcessUnloadCommand(PLayer player, string[] words)
     {
         if (player.Place is null)

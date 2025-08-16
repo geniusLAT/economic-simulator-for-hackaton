@@ -100,6 +100,37 @@ public class Character : Actor
         return false;
     }
 
+    public bool Load(Item Cargo, SpaceShip ship, uint quantityToLoad)
+    {
+        if (Cargo.Quantity < quantityToLoad)
+        {
+            return false;
+        }
+
+        if (Cargo.Quantity == quantityToLoad)
+        {
+            return Load(Cargo, ship);
+        }
+
+        if (Place is SpaceStation)
+        {
+            if (ship.Parking == Place)
+            {
+                Cargo.Quantity -= quantityToLoad;
+
+                var newCargo = new Item()
+                {
+                    Owner = Cargo.Owner,
+                    Type = Cargo.Type,
+                    Quantity = quantityToLoad
+                };
+                newCargo.TransitToNewLocation(null, ship);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool Load(Item Cargo, SpaceShip ship)
     {
         if (Place is SpaceStation)
