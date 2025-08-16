@@ -1,6 +1,7 @@
 ﻿using Simulation.Entities.Characters;
 using Simulation.Entities.Locations;
 using System;
+using System.Numerics;
 
 namespace Simulation.Simulators;
 
@@ -26,7 +27,7 @@ public class PlayerPromptProcessor
             case "помощь":
                 break;
             case "осмотр":
-                return player.Place?.View() ?? "Пустота и ничего более";
+                return await ProcessViewCommand(player, words);
             case "сойти":
                 return await ProcessDisEmbarkCommand(player, words);
             case "подняться":
@@ -42,6 +43,22 @@ public class PlayerPromptProcessor
         }
 
         return "ошибка";
+    }
+
+    public async Task<string> ProcessViewCommand(PLayer player, string[] words)
+    {
+        if (words.Length == 1)
+        {
+            Console.WriteLine("Only one word");
+            return player.Place?.View() ?? "Пустота и ничего более"; 
+        }
+
+        if (words[1] == "груз")
+        {
+            return player.Place?.CargoView() ?? "Пустота и ничего более";
+        }
+
+        return "ошибка команды осмотра";
     }
 
     public async Task<string> ProcessDisEmbarkCommand(PLayer pLayer, string[] words)

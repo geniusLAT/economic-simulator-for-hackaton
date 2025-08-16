@@ -1,5 +1,6 @@
 ﻿using Simulation.Entities;
 using Simulation.Entities.Characters;
+using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
 using Simulation.Simulators;
 
@@ -122,6 +123,100 @@ public class ProcessPromptTests
 Кораблей припарковано: 0
 ";
         Assert.That(result, Is.EqualTo(expected.Replace("\r","")));
+    }
+
+    [Test]
+    public async Task ProcessPrompt_PlayerCargoViewAtEmptyStation()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var pLayer = new PLayer()
+        {
+            Name = "Joe Doe",
+            Place = station
+        };
+
+        _simulator.Characters.Add(pLayer);
+        _simulator.PLayerCharacters.Add(pLayer);
+
+        //Act
+        var result = await _playerPromptProcessor.ProcessPromptAsync("осмотр груз 3", pLayer.Guid);
+
+        //Assert
+        Console.WriteLine(result);
+
+        var expected = @"Грузов: 0";
+        Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
+    }
+
+    [Test]
+    public async Task ProcessPrompt_PlayerCargoViewStationWithThreeCargos()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var pLayer = new PLayer()
+        {
+            Name = "Joe Doe",
+            Place = station
+        };
+
+        _simulator.Characters.Add(pLayer);
+        _simulator.PLayerCharacters.Add(pLayer);
+
+        var cargo1 = new Item()
+        {
+            Owner = pLayer,
+            Quantity = 10,
+            Type = ItemType.ore
+        };
+        cargo1.TransitToNewLocation(null, station);
+
+        var cargo2 = new Item()
+        {
+            Owner = pLayer,
+            Quantity = 20,
+            Type = ItemType.food
+        };
+        cargo2.TransitToNewLocation(null, station);
+
+        var cargo3 = new Item()
+        {
+            Owner = pLayer,
+            Quantity = 100,
+            Type = ItemType.metal
+        };
+        cargo3.TransitToNewLocation(null, station);
+
+        //Act
+        var result = await _playerPromptProcessor.ProcessPromptAsync("осмотр груз", pLayer.Guid);
+
+        //Assert
+        Console.WriteLine(result);
+
+        var expected = @"Грузов: 130
+|Номер|Наименование товара|Количество|Владелец|
+|-----|-------------------|----------|--------|
+|1    |Руда               |10        |Joe Doe |
+|2    |Продовольствие     |20        |Joe Doe |
+|3    |Металл             |100       |Joe Doe |
+";
+        Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
     }
 
     [Test]

@@ -34,7 +34,7 @@ public class Item
 
     public void TransitToNewLocation(Location? oldLocation, Location location)
     {
-        if(oldLocation is not null)
+        if (oldLocation is not null)
         {
             oldLocation.cargos.Remove(this);
         }
@@ -50,5 +50,17 @@ public class Item
         {
             location.cargos.Add(this);
         }
+    }
+
+    public List<string> ToStringList(int index)
+    {
+        return new List<string>()
+        {
+            index.ToString(),
+            Item.TypeToString(Type),
+            Quantity.ToString(),
+            Owner?.Name ?? "-",
+
+        };
     }
 }
