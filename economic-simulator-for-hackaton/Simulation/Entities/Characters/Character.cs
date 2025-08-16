@@ -12,7 +12,7 @@ public class Character : Actor
 
     public void Do()
     {
-
+        Behavior?.Do(this);
     }
 
     public bool PublishOffer(Offer offer)

@@ -10,11 +10,13 @@ namespace Simulation.Entities.Characters.BehaviorModel;
 
 public class StupidSellerBehavior : IBehavior
 {
-    List<Offer> myOffers;
+    List<Offer> myOffers = [];
 
     public void Do(Character me)
     {
-        if(me.Place is null)
+        Console.WriteLine("Stupid Seller here");
+
+        if (me.Place is null)
         {
             return;
         }
@@ -22,6 +24,7 @@ public class StupidSellerBehavior : IBehavior
         //Unloading all my goods to sell it
         if(me.Place is SpaceShip)
         {
+            Console.WriteLine("Unloading");
             var ship = (SpaceShip)me.Place;
             if(ship.Parking is null)
             {
@@ -29,7 +32,7 @@ public class StupidSellerBehavior : IBehavior
                 return;
             }
 
-            foreach(var cargo in ship.cargos)
+            foreach(var cargo in ship.cargos.ToArray())
             {
                 if (cargo.Owner == me)
                 {
@@ -38,6 +41,9 @@ public class StupidSellerBehavior : IBehavior
             }
             me.Disembark();
         }
+
+        if(me.Place.cargos is null) return;
+        if(me.Place.cargos.Count == 0) return;
 
         List<Item> newOfferCandidates = me.Place.cargos
         .Where(cargo => cargo.Owner == me && !myOffers.Any(offer => offer.ItemToSell == cargo))
@@ -58,7 +64,8 @@ public class StupidSellerBehavior : IBehavior
                 ItemType = newOfferCandidate.Type,
                 IsOffererSelling = true,
                 //In base NPC will try to double his balance
-                pricePerOne = price
+                pricePerOne = price,
+                PriceBorder = 0
             };
 
             if (me.PublishOffer(offer))

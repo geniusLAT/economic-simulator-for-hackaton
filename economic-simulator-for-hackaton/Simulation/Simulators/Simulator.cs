@@ -20,8 +20,11 @@ public class Simulator
 
     public async Task FinishDay()
     {
+        Console.WriteLine("Finishing day");
+
         foreach (var character in Characters)
         {
+            Console.WriteLine($" character {character.Name} is finishing day");
             character.Do();
         }
 
@@ -29,7 +32,8 @@ public class Simulator
         {
             foreach (var offer in station.localOffers)
             {
-                offer.UpdatePrice();
+               var newPrice = offer.UpdatePrice();
+                Console.WriteLine($"new price is {newPrice}");
             }
         }
     }
