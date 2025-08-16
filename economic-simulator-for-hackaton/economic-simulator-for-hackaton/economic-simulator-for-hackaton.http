@@ -1,0 +1,6 @@
+@economic_simulator_for_hackaton_HostAddress = http://localhost:5074
+
+GET {{economic_simulator_for_hackaton_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
