@@ -1,4 +1,7 @@
-﻿using Simulation.Entities.Items;
+﻿using Simulation.Entities.Characters;
+using Simulation.Entities.Items;
+using Simulation.Entities.Locations;
+using System;
 
 namespace Simulation.Entities;
 
@@ -113,5 +116,104 @@ public class Offer
                 return pricePerOne;
             }
         }
+    }
+
+    public bool accept(Actor accepter, int quantity, SpaceStation station)
+    {
+        var totalPrice = quantity * pricePerOne;
+
+        if (quantity > QuantityBorder)
+        {
+            return false;
+        }
+
+        if (IsOffererSelling)
+        {
+            if(accepter.moneyBalance < totalPrice)
+            {
+                return false;
+            }
+
+            if (ItemToSell is null)
+            {
+                ItemToSell = (from cargo in station.cargos
+                                    where cargo.Owner == accepter && cargo.Type == ItemType
+                                    select cargo).FirstOrDefault();
+            }
+
+            if (ItemToSell is null)
+            {
+                return false; 
+            }
+
+            if (quantity > ItemToSell.Quantity)
+            {
+                return false;
+            }
+
+            if(quantity == ItemToSell.Quantity)
+            {
+                ItemToSell.Owner = accepter;
+            }
+
+            if (quantity < ItemToSell.Quantity)
+            {
+                ItemToSell.Quantity -= (uint)quantity;
+
+                var newItem = new Item()
+                {
+                   Type = ItemType,
+                   Owner = accepter,
+                   Quantity = (uint)quantity
+                };
+                newItem.TransitToNewLocation(null, station);
+            }
+
+            WasUsedYesterday += (uint)quantity;
+            accepter.moneyBalance -= totalPrice;
+            Offerer.moneyBalance += totalPrice;
+        }
+        else
+        {
+            Item? itemToSell = (from cargo in station.cargos
+                                where cargo.Owner == accepter && cargo.Type == ItemType
+                                select cargo).FirstOrDefault();
+            if (itemToSell is null)
+            {
+                return false;
+            }
+
+            if (Offerer.moneyBalance < totalPrice)
+            {
+                return false;
+            }
+
+            if (itemToSell.Quantity < quantity)
+            {
+                return false;
+            }
+            if (quantity == ItemToSell.Quantity)
+            {
+                ItemToSell.Owner = Offerer;
+            }
+            if (quantity < ItemToSell.Quantity)
+            {
+                ItemToSell.Quantity -= (uint)quantity;
+
+                var newItem = new Item()
+                {
+                    Type = ItemType,
+                    Owner = Offerer,
+                    Quantity = (uint)quantity
+                };
+                newItem.TransitToNewLocation(null, station);
+            }
+
+            WasUsedYesterday += (uint)quantity;
+            accepter.moneyBalance += totalPrice;
+            Offerer.moneyBalance -= totalPrice;
+
+        }
+        return true;
     }
 }

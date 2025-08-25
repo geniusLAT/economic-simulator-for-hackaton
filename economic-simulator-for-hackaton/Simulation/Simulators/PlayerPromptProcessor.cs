@@ -1,7 +1,9 @@
 ﻿using Simulation.Entities.Characters;
+using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
 using System;
 using System.Numerics;
+using System.Linq;
 
 namespace Simulation.Simulators;
 
@@ -40,11 +42,104 @@ public class PlayerPromptProcessor
                 return await ProcessTakeOffCommand(player, words);
             case "разгрузить":
                 return await ProcessUnloadCommand(player, words);
+            case "загрузить":
+                return await ProcessLoadCommand(player, words);
+            case "торговать":
+                return await ProcessLoadCommand(player, words);
             default:
                 return "команда не распознана";
         }
 
         return "ошибка";
+    }
+
+    public async Task<string> ProcessTradeCommand(PLayer player, string[] words)
+    {
+        if (player.Place is null)
+        {
+            return "Вы находитесь нигде, тут не размещаются торговые предложения";
+        }
+        if (player.Place is SpaceShip)
+        {
+            return "Вы на корабле. На кораблях не размещаются торговые предложения";
+        }
+        if (player.Place is SpaceStation)
+        {
+            var station = player.Place as SpaceStation;
+
+            if (words.Length < 2)
+            {
+                return "Вы не указали номер торгового предложения";
+            }
+
+            if (!int.TryParse(words[1], out int offerNumber))
+            {
+                return $"{words[1]} - некорректный номер торгового предложения";
+            }
+
+            if (offerNumber < 1)
+            {
+                return $"{words[1]} - некорректный номер торгового предложения, нумерация начинается с 1";
+            }
+
+            var trueOfferNumber = offerNumber - 1;
+            if (trueOfferNumber >= station.localOffers.Count)
+            {
+                return $"торговое предложение с таким индексом не найдено, осмотритесь, чтобы найти индексы торговых предложений";
+            }
+            var offer = station.localOffers[trueOfferNumber];
+
+            if (!int.TryParse(words[2], out int quantityToLoad))
+            {
+                return $"{words[2]} - некорректное количество груза для обмена";
+            }
+
+            if (quantityToLoad < 1)
+            {
+                return "Количество груза должно быть положительным";
+            }
+
+            if(quantityToLoad > offer.QuantityBorder)
+            {
+                return $"Контрагент не готов работать с настолько большим объёмом. Его максимум: {offer.QuantityBorder}";
+            }
+
+            if (!offer.IsOffererSelling)
+            {
+                Item? itemToSell = (from cargo in station.cargos
+                                    where cargo.Owner == player && cargo.Type == offer.ItemType
+                                    select cargo).FirstOrDefault();
+                if (itemToSell is null)
+                {
+                    return "У вас нет груза, чтобы предложить его на продажу";
+                }
+
+                if (itemToSell.Quantity < quantityToLoad)
+                {
+                    return $"Нельзя продать {quantityToLoad} единиц груза, так как у вас есть только {itemToSell.Quantity}";
+                }
+            }
+            else
+            {
+                var totalPrice = quantityToLoad * offer.pricePerOne;
+                if (totalPrice < player.moneyBalance)
+                {
+                    return $"Нельзя купить {quantityToLoad} штук по цене {offer.pricePerOne}. " +
+                        $"Это потребовало бы {totalPrice}, у вас только {player.moneyBalance}";
+
+                }
+            }
+
+            if (offer.accept(player, quantityToLoad, station))
+            {
+                return "Сделка завершена";
+            }
+            else
+            {
+                return "Сделка не удалась";
+            }
+        }
+        return "Тут не разгрузить";
     }
 
     public async Task<string> ProcessLoadCommand(PLayer player, string[] words)
