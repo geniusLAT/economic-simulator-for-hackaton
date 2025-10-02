@@ -152,11 +152,6 @@ public abstract class CombineBehavior : IFacilityBehavior
                           select cargo).FirstOrDefault();
         if (ItemToSell is not null)
         {
-            ItemToSell.Quantity--;
-            if (ItemToSell.Quantity < 1)
-            {
-                station.cargos.Remove(ItemToSell);
-            }
             if(scaleableFacility.ScaleUpEquipmentBuyInOffer is not null)
             {
                 scaleableFacility.ScaleUpEquipmentBuyInOffer.QuantityBorder = 0;
@@ -164,7 +159,7 @@ public abstract class CombineBehavior : IFacilityBehavior
                 facility.myOffers.Remove(scaleableFacility.ScaleUpEquipmentBuyInOffer);
                 Console.WriteLine($"Stopped buing {scaleableFacility.ScaleUpEquipmentBuyInOffer.ItemType} for scaling up");
             }
-            return scaleableFacility.ScaleUp();
+            return scaleableFacility.ScaleUp(facility);
         }
 
         scaleableFacility.ScaleUpEquipmentBuyInOffer = (from offer in station.localOffers
