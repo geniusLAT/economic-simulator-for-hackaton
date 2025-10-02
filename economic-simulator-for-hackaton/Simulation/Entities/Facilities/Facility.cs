@@ -1,6 +1,4 @@
 ﻿using Simulation.Entities.Characters;
-using Simulation.Entities.Characters.BehaviorModel;
-using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
 
 namespace Simulation.Entities.Facilities;

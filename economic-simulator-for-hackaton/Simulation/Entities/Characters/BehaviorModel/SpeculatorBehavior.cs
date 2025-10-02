@@ -1,6 +1,5 @@
 ﻿using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
-using System;
 
 namespace Simulation.Entities.Characters.BehaviorModel;
 

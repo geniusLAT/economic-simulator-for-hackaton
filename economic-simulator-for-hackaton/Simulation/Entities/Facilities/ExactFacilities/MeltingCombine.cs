@@ -1,5 +1,4 @@
 ﻿using Simulation.Entities.Items;
-using Simulation.Entities.Locations;
 
 namespace Simulation.Entities.Facilities.Facilities;
 

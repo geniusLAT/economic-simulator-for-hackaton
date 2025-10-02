@@ -1,5 +1,6 @@
 ﻿namespace Simulation.Entities.Facilities.FacilityBehavior;
 
-public sealed class FuelCombineBehavior : CombineBehavior
+public sealed class MeltingCombineBehavior : CombineBehavior
 {
+
 }
