@@ -33,7 +33,7 @@ public class PlayerPromptProcessor
             case "сойти":
                 return await ProcessDisEmbarkCommand(player, words);
             case "подняться":
-                return await ProcessDisEmbarkCommand(player, words);
+                return await ProcessEmbarkCommand(player, words);
             case "посадка":
                 return await ProcessLandCommand(player, words);
             case "взлёт":
@@ -45,7 +45,7 @@ public class PlayerPromptProcessor
             case "загрузить":
                 return await ProcessLoadCommand(player, words);
             case "торговать":
-                return await ProcessLoadCommand(player, words);
+                return await ProcessTradeCommand(player, words);
             default:
                 return "команда не распознана";
         }
@@ -122,11 +122,10 @@ public class PlayerPromptProcessor
             else
             {
                 var totalPrice = quantityToLoad * offer.pricePerOne;
-                if (totalPrice < player.moneyBalance)
+                if (totalPrice > player.moneyBalance)
                 {
                     return $"Нельзя купить {quantityToLoad} штук по цене {offer.pricePerOne}. " +
                         $"Это потребовало бы {totalPrice}, у вас только {player.moneyBalance}";
-
                 }
             }
 
