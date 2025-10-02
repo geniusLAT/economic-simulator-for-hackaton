@@ -1,4 +1,5 @@
-﻿using Simulation.Entities.Locations;
+﻿using Simulation.Entities.Items;
+using Simulation.Entities.Locations;
 using System;
 
 namespace Simulation.Entities.Characters.BehaviorModel;
@@ -11,7 +12,9 @@ public class SpeculatorBehavior : IBehavior
 
     public void Do(Character me)
     {
+
         Console.WriteLine("speculator is here");
+        TrySellUseless(me);
 
         if (OfferToBuy is null || OfferToSell is null)
         {
@@ -184,5 +187,47 @@ public class SpeculatorBehavior : IBehavior
         };
         Console.WriteLine($"Speculator have no options");
         return false;
+    }
+
+    void TrySellUseless(Character me)
+    {
+        Console.WriteLine($"Speculator is looking for new pair");
+        var station = me.Place as SpaceStation;
+        if (station is null)
+        {
+            return;
+        }
+        List<Item> sellCandidates = me.Place.cargos
+        .Where(cargo => cargo.Owner == me)
+        .ToList();
+
+         List<Offer> offers = station.localOffers
+        .Where(offer => offer.Offerer != me)
+        .Where(offer => !offer.IsOffererSelling)
+        .ToList();
+
+        foreach (var cargo in sellCandidates)
+        {
+            Console.WriteLine($"Speculator {me.Name} has useless {cargo.Type}");
+
+            var bestPrice = 0f;
+            Offer bestOffer = null;
+            foreach (var offer in offers)
+            {
+                if( cargo.Type == offer.ItemType && offer.pricePerOne > bestPrice)
+                {
+                    bestOffer = offer;
+                    bestPrice = offer.pricePerOne;
+                }
+            }
+
+            if (bestOffer is not null)
+            {
+                int quantity =(int) Math.Min((long)cargo.Quantity, (long)bestOffer.QuantityBorder);
+                Console.WriteLine($"Speculator {me.Name} sold useless" +
+                    $" {quantity} items of {cargo.Type} for {bestPrice} per one");
+                bestOffer.accept(me, quantity, station);
+            }
+        }
     }
 }

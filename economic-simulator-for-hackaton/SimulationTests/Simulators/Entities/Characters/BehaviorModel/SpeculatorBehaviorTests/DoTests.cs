@@ -193,4 +193,62 @@ public class DoTests
         Console.WriteLine($"Expected second price change: {ExpectedSecondPrice}");
         Assert.That(secondPrice, Is.EqualTo(ExpectedSecondPrice));
     }
+
+    [Test]
+    public async Task Do_SoldUselessItems()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var buyer = new Character()
+        {
+            Name = "buyer I",
+            Behavior = new StupidBuyerBehavior()
+            { TypeToBuy = ItemType.fuel },
+            Place = station,
+            moneyBalance = 500
+        };
+
+        _simulator.Characters.Add(buyer);
+
+        var speculator = new Character()
+        {
+            Name = "speculator I",
+            Behavior = new SpeculatorBehavior(),
+            Place = station,
+            moneyBalance = 500
+        };
+        _simulator.Characters.Add(speculator);
+        var cargo = new Item()
+        {
+            Owner = speculator,
+            Type = ItemType.fuel,
+            Quantity = 1
+        };
+        cargo.TransitToNewLocation(null, station);
+        //Act
+        await _simulator.SkipDays(3);
+
+        //Assert
+        Console.WriteLine($"        cargos");
+        foreach (var theCargo in station.cargos)
+        {
+            Console.WriteLine($"{theCargo.Owner.Name}, {theCargo.Quantity}");
+        }
+        Console.WriteLine($"        offers");
+        foreach (var theOffer in station.localOffers)
+        {
+            Console.WriteLine($"{theOffer.Offerer.Name}, {theOffer.pricePerOne}");
+        }
+
+        Assert.That(station.cargos.Count, Is.EqualTo(1));
+        Assert.That(station.cargos.FirstOrDefault().Owner, Is.EqualTo(buyer));
+    }
 }
