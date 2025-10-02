@@ -40,6 +40,10 @@ public class CeoBehavior : IBehavior
             case MiningCombine combine:
                 combine.Behavior = new MiningCombineBehavior();
                 return true;
+
+            case FuelCombine combine:
+                combine.Behavior = new FuelCombineBehavior();
+                return true;
             default:
                 return false;
         }

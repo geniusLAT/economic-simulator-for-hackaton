@@ -24,6 +24,8 @@ public class Item
                 return "Продовольствие";
             case ItemType.miningEquipment:
                 return "Шахтёрское оборудование";
+            case ItemType.fuelProducingEquipment:
+                return "Оборудование для синтеза топлива";
             default:
                 return "Нечто";
         }
