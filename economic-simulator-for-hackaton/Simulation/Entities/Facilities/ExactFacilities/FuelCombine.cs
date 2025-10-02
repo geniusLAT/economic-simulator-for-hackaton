@@ -43,7 +43,7 @@ public class FuelCombine : ProducingFacility, IScaleableFacility
         uint currentLevelOfFuel = 0;
         foreach (var facility in station.facilities)
         {
-            var fuelFacility = facility as MiningCombine;
+            var fuelFacility = facility as FuelCombine;
             if (fuelFacility is null) continue;
 
             currentLevelOfFuel += fuelFacility.Level;
