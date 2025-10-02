@@ -10,7 +10,7 @@ public class PLayer : Character
         Behavior = new PlayerBehavior();
     }
 
-    public bool Busy { get; set; } = false;
+    public bool ReadyForDayFinishing { get; set; } = false;
 
     public Guid Guid { get; set; }
 }

@@ -13,6 +13,10 @@ public class Simulator
 
     public List<SpaceStation> spaceStations { get; set; } = [];
 
+    public bool SkipDayWhenAllPlayersAreReady { get; set; } = false;
+
+    public uint SecondsInCycle { get; set; } = 60;
+
     public async Task GenerateWorldAsync()
     {
 
@@ -35,6 +39,7 @@ public class Simulator
                var newPrice = offer.UpdatePrice();
                 Console.WriteLine($"new price is {newPrice}");
             }
+            PLayerCharacters.ForEach(p => p.ReadyForDayFinishing = false);
         }
 
         foreach (var spaceShip in spaceShips)
@@ -55,5 +60,28 @@ public class Simulator
     public SpaceStation? GetStationByCoord(uint x, uint y)
     {
          return spaceStations.FirstOrDefault(s => s.coordX == x && s.coordY == y);
+    }
+
+    public async Task Simulate(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            if (SkipDayWhenAllPlayersAreReady) 
+            {
+                for (int i = 0; i < SecondsInCycle; i++)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(1), token);
+                    if (PLayerCharacters.All(p => p.ReadyForDayFinishing))
+                    {
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                await Task.Delay(TimeSpan.FromSeconds(60), token);
+            }
+            await FinishDay();
+        }
     }
 }
