@@ -40,6 +40,8 @@ public class PlayerPromptProcessor
                 return await ProcessTakeOffCommand(player, words);
             case "взлет":
                 return await ProcessTakeOffCommand(player, words);
+            case "курс":
+                return await ProcessSetDestinationCommand(player, words);
             case "разгрузить":
                 return await ProcessUnloadCommand(player, words);
             case "загрузить":
@@ -51,6 +53,50 @@ public class PlayerPromptProcessor
         }
 
         return "ошибка";
+    }
+
+    public async Task<string> ProcessSetDestinationCommand(PLayer pLayer, string[] words)
+    {
+        if (pLayer.Place is null)
+        {
+            return "Вы находитесь нигде, не на корабле";
+        }
+        if (pLayer.Place is SpaceStation)
+        {
+            return "Вы находитесь на станции, станции не летают";
+        }
+        if (pLayer.Place is SpaceShip)
+        {
+            var ship = pLayer.Place as SpaceShip;
+            if (ship.Captain != pLayer)
+            {
+                return "Вы не капитан этого корабля, вы не можете отдавать приказ на смену курса";
+            }
+
+            if (ship.Parking is not null)
+            {
+                return "Корабль посажен и не может выставить курс";
+            }
+            if (words.Length < 3)
+            {
+                return "Вы не указали верные координаты, курс не задан";
+            }
+
+            uint potentialX;
+            if(! uint.TryParse(words[1], out potentialX))
+            {
+                return $"{words[1]} не является корректной координатой";
+            }
+
+            uint potentialY;
+            if (!uint.TryParse(words[2], out potentialY))
+            {
+                return $"{words[2]} не является корректной координатой";
+            }
+            ship.SetDestination(potentialX, potentialY);
+            return $"Курс задан х = {ship.DestinationX}, y = {ship.DestinationY}";
+        }
+        return "Это не корабль, на котором можно выставить курс";
     }
 
     public async Task<string> ProcessTradeCommand(PLayer player, string[] words)

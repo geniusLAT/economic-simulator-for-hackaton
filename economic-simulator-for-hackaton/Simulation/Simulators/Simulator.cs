@@ -22,6 +22,12 @@ public class Simulator
     {
         Console.WriteLine("Finishing day");
 
+        foreach (var spaceShip in spaceShips)
+        {
+            Console.WriteLine($" spaceShip {spaceShip.Name} is finishing day");
+            //character.Do();
+        }
+
         foreach (var character in Characters)
         {
             Console.WriteLine($" character {character.Name} is finishing day");

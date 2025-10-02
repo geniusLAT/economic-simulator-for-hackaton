@@ -13,6 +13,10 @@ public class SpaceShip : Location
 
     public SpaceStation? Parking {  get; set; }
 
+    public uint DestinationX { get; set; }
+
+    public uint DestinationY { get; set; }
+
     public override string View()
     {
         var result = $"Корабль называется {Name}, находится по координатам {coordX}, {coordY}\n";
@@ -32,6 +36,9 @@ public class SpaceShip : Location
 
     public bool Land(SpaceStation station)
     {
+        //Navigation system default setting
+        SetDestination(coordX, coordY);
+
         coordX = station.coordX;
         coordY = station.coordY;
         Parking = station;
@@ -51,6 +58,12 @@ public class SpaceShip : Location
         Parking = null;
 
         return true;
+    }
+
+    public void SetDestination(uint x, uint y)
+    {
+        DestinationX = x; 
+        DestinationY = y;
     }
 
     public List<string> ToStringList(int index)
