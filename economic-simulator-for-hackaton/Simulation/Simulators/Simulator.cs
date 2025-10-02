@@ -22,12 +22,6 @@ public class Simulator
     {
         Console.WriteLine("Finishing day");
 
-        foreach (var spaceShip in spaceShips)
-        {
-            Console.WriteLine($" spaceShip {spaceShip.Name} is finishing day");
-            //character.Do();
-        }
-
         foreach (var character in Characters)
         {
             Console.WriteLine($" character {character.Name} is finishing day");
@@ -41,6 +35,12 @@ public class Simulator
                var newPrice = offer.UpdatePrice();
                 Console.WriteLine($"new price is {newPrice}");
             }
+        }
+
+        foreach (var spaceShip in spaceShips)
+        {
+            Console.WriteLine($" spaceShip {spaceShip.Name} is finishing day");
+            spaceShip.FinishDay();
         }
     }
 

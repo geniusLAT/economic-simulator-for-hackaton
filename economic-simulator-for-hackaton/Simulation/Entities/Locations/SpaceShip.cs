@@ -17,6 +17,8 @@ public class SpaceShip : Location
 
     public uint DestinationY { get; set; }
 
+    public uint SpeedPerDay { get; set; } = 1;
+
     public override string View()
     {
         var result = $"Корабль называется {Name}, находится по координатам {coordX}, {coordY}\n";
@@ -58,6 +60,47 @@ public class SpaceShip : Location
         Parking = null;
 
         return true;
+    }
+
+    public void FinishDay()
+    {
+        if( coordX == DestinationX && coordY == DestinationY)
+        {
+            return;
+        }
+
+        if(Parking is not null )
+        {
+            return;
+        }
+
+        for (int i = 0; i < SpeedPerDay; i++)
+        {
+            Move();
+        }
+    }
+
+    public void Move()
+    {
+        if(coordX > DestinationX)
+        {
+            coordX--;
+        }
+
+        if (coordX < DestinationX)
+        {
+            coordX++;
+        }
+
+        if (coordY > DestinationY)
+        {
+            coordY--;
+        }
+
+        if (coordY < DestinationY)
+        {
+            coordY++;
+        }
     }
 
     public void SetDestination(uint x, uint y)
