@@ -1,4 +1,5 @@
-﻿using Simulation.Utilities;
+﻿using Simulation.Entities.Facilities;
+using Simulation.Utilities;
 
 namespace Simulation.Entities.Locations;
 
@@ -7,6 +8,8 @@ public class SpaceStation : Location
     public List<SpaceShip> parkedShips { get; set; } = [];
 
     public List<Offer> localOffers { get; set; } = [];
+
+    public List<Facility> facilities { get; set; } = [];
 
     public uint MaxLevelOfMining { get; set; } = 0;
 

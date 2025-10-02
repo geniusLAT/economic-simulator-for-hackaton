@@ -1,0 +1,47 @@
+﻿using Simulation.Entities.Facilities;
+using Simulation.Entities.Facilities.Facilities;
+using Simulation.Entities.Facilities.FacilityBehavior;
+using Simulation.Entities.Items;
+using Simulation.Entities.Locations;
+
+namespace Simulation.Entities.Characters.BehaviorModel;
+
+public class CeoBehavior : IBehavior
+{
+    public List<Facility> myFacilities = [];
+
+    public void Do(Character me)
+    {
+        Console.WriteLine("CEO here");
+
+        if (me.Place is null)
+        {
+            return;
+        }
+
+        foreach (Facility facility in myFacilities)
+        {
+            if (facility.Behavior is null)
+            {
+                if (!ChooseBehaviorForFacility(facility)) 
+                {
+                    continue;
+                }
+                Console.WriteLine($"{me.Name} finds strategy for {facility.Name}");
+            }
+            facility.Behavior!.Do(facility);
+        }
+    }
+
+    public bool ChooseBehaviorForFacility(Facility facility)
+    {
+        switch (facility)
+        {
+            case MiningCombine combine:
+                combine.Behavior = new MiningCombineBehavior();
+                return true;
+            default:
+                return false;
+        }
+    }
+}

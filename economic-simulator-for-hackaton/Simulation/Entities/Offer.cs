@@ -100,9 +100,14 @@ public class Offer
 
             if (WasUsedYesterday == 0)
             {
+                
                 pricePerOne += pricePerOne * 0.1f;
+                if (pricePerOne == 0)
+                {  
+                    pricePerOne = 0.01f;
+                }
 
-                if (pricePerOne > PriceBorder)
+                    if (pricePerOne > PriceBorder)
                 {
                     Console.WriteLine($"price {pricePerOne} is on border {PriceBorder} ");
                     pricePerOne = PriceBorder;

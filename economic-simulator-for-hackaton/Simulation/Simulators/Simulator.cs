@@ -31,7 +31,6 @@ public class Simulator
             Console.WriteLine($" character {character.Name} is finishing day");
             character.Do();
         }
-
         foreach (var station in spaceStations)
         {
             foreach (var offer in station.localOffers)
@@ -39,7 +38,10 @@ public class Simulator
                var newPrice = offer.UpdatePrice();
                 Console.WriteLine($"new price is {newPrice}");
             }
-            PLayerCharacters.ForEach(p => p.ReadyForDayFinishing = false);
+            foreach (var facility in station.facilities)
+            {
+               facility.FinishDay();
+            }
         }
 
         foreach (var spaceShip in spaceShips)
@@ -47,6 +49,7 @@ public class Simulator
             Console.WriteLine($" spaceShip {spaceShip.Name} is finishing day");
             spaceShip.FinishDay();
         }
+        PLayerCharacters.ForEach(p => p.ReadyForDayFinishing = false);
     }
 
     public async Task SkipDays(uint days)

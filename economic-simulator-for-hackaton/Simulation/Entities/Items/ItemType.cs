@@ -6,4 +6,5 @@ public enum ItemType
     metal,
     fuel,
     food,
+    miningEquipment
 }
