@@ -27,7 +27,7 @@ public class Offer
     public override string ToString()
     {
         var typeStr = "продаёт";
-        if (IsOffererSelling)
+        if (!IsOffererSelling)
         {
             typeStr = "скупает";
         }
@@ -43,7 +43,7 @@ public class Offer
     public List<string> ToStringList(int index)
     {
         var typeStr = "продаёт";
-        if (IsOffererSelling)
+        if (!IsOffererSelling)
         {
             typeStr = "скупает";
         }
@@ -67,6 +67,7 @@ public class Offer
 
     public float UpdatePrice()
     {
+        Console.WriteLine($"    {Offerer.Name} updating price");
         if (IsOffererSelling)
         {
             if(WasUsedYesterday == 0)
@@ -94,7 +95,7 @@ public class Offer
         }
         else
         {
-            if(Offerer.moneyBalance < PriceBorder)
+            if (Offerer.moneyBalance < PriceBorder)
             {
                 PriceBorder = Offerer.moneyBalance;
             }
@@ -102,17 +103,21 @@ public class Offer
             if (WasUsedYesterday == 0)
             {
                 pricePerOne += pricePerOne * 0.1f;
+
                 if (pricePerOne > PriceBorder)
                 {
+                    Console.WriteLine($"price {pricePerOne} is on border {PriceBorder} ");
                     pricePerOne = PriceBorder;
                 }
                 WasUsedYesterday = 0;
+                Console.WriteLine($"price is upper: {pricePerOne}");
                 return pricePerOne;
             }
             else
             {
                 pricePerOne -= pricePerOne * 0.1f;
                 WasUsedYesterday = 0;
+                Console.WriteLine($"price is lower: {pricePerOne}");
                 return pricePerOne;
             }
         }
@@ -129,31 +134,30 @@ public class Offer
 
         if (IsOffererSelling)
         {
-            if(accepter.moneyBalance < totalPrice)
+            Console.WriteLine($"IsOffererSelling");
+            if (accepter.moneyBalance < totalPrice)
             {
+                Console.WriteLine($"not enogh money");
                 return false;
             }
 
             if (ItemToSell is null)
             {
                 ItemToSell = (from cargo in station.cargos
-                                    where cargo.Owner == accepter && cargo.Type == ItemType
+                                    where cargo.Owner == Offerer && cargo.Type == ItemType
                                     select cargo).FirstOrDefault();
             }
 
             if (ItemToSell is null)
             {
+                Console.WriteLine($"Nothing to sell, product is needed");
                 return false; 
             }
 
             if (quantity > ItemToSell.Quantity)
             {
+                Console.WriteLine($"Not enough product");
                 return false;
-            }
-
-            if(quantity == ItemToSell.Quantity)
-            {
-                ItemToSell.Owner = accepter;
             }
 
             if (quantity < ItemToSell.Quantity)
@@ -168,6 +172,12 @@ public class Offer
                 };
                 newItem.TransitToNewLocation(null, station);
             }
+            if (quantity == ItemToSell.Quantity)
+            {
+                ItemToSell.Owner = accepter;
+                ItemToSell.TransitToNewLocation(station, station);
+                ItemToSell = null;
+            }
 
             WasUsedYesterday += (uint)quantity;
             accepter.moneyBalance -= totalPrice;
@@ -178,27 +188,28 @@ public class Offer
             Item? itemToSell = (from cargo in station.cargos
                                 where cargo.Owner == accepter && cargo.Type == ItemType
                                 select cargo).FirstOrDefault();
+            Console.WriteLine($"IsOfferer Buying");
             if (itemToSell is null)
             {
+                Console.WriteLine($"Nothing to buy");
                 return false;
             }
 
             if (Offerer.moneyBalance < totalPrice)
             {
+                Console.WriteLine($"Not enough money to buy {Offerer.Name} " +
+                    $"got only {Offerer.moneyBalance}, but has to pay {totalPrice}");
                 return false;
             }
 
             if (itemToSell.Quantity < quantity)
             {
+                Console.WriteLine($"not enough cargo to buy");
                 return false;
             }
-            if (quantity == ItemToSell.Quantity)
+            if (quantity < itemToSell.Quantity)
             {
-                ItemToSell.Owner = Offerer;
-            }
-            if (quantity < ItemToSell.Quantity)
-            {
-                ItemToSell.Quantity -= (uint)quantity;
+                itemToSell.Quantity -= (uint)quantity;
 
                 var newItem = new Item()
                 {
@@ -208,12 +219,17 @@ public class Offer
                 };
                 newItem.TransitToNewLocation(null, station);
             }
-
+            if (quantity == itemToSell.Quantity)
+            {
+                itemToSell.Owner = Offerer;
+                itemToSell.TransitToNewLocation(station, station);
+            }
             WasUsedYesterday += (uint)quantity;
             accepter.moneyBalance += totalPrice;
             Offerer.moneyBalance -= totalPrice;
 
         }
+        Console.WriteLine($"Deal is closed");
         return true;
     }
 }

@@ -79,4 +79,35 @@ public class SpaceStation : Location
         }
         return result + drawer.Draw(true);
     }
+
+    public void Enthusiastic()
+    {
+        var offersToSell = (from offer in localOffers
+                            where offer.IsOffererSelling
+                            select offer 
+                            );
+        Offer firstOffer = null;
+        Offer secondOffer = null;
+        float contrast = 0;
+
+        foreach ( var offer in offersToSell )
+        {
+            var bestOffer = (from potentialOffer in localOffers
+                             where !potentialOffer.IsOffererSelling
+                             orderby potentialOffer.pricePerOne
+                             select potentialOffer
+                             ).LastOrDefault();
+            if (bestOffer == null)
+            {
+                continue;
+            }
+            var localContrast = bestOffer.pricePerOne - offer.pricePerOne;
+            if (contrast < localContrast)
+            {
+                contrast = localContrast;
+                firstOffer = offer;
+                secondOffer = offer;
+            }
+        }
+    }
 }
