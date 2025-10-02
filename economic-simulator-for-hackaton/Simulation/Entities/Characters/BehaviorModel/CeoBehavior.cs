@@ -40,9 +40,11 @@ public class CeoBehavior : IBehavior
             case MiningCombine combine:
                 combine.Behavior = new MiningCombineBehavior();
                 return true;
-
             case FuelCombine combine:
                 combine.Behavior = new FuelCombineBehavior();
+                return true;
+            case FoodCombine combine:
+                combine.Behavior = new FoodCombineBehavior();
                 return true;
             default:
                 return false;

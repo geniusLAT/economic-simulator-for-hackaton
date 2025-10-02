@@ -98,6 +98,7 @@ public abstract class CombineBehavior : IFacilityBehavior
                 QuantityBorder = ItemToSell.Quantity,
                 PriceBorder = 1,
                 pricePerOne = price,
+                HaveToMoveQuantityBorder = true
             };
 
             facility.Ceo.PublishOffer(productionOffer);
@@ -188,6 +189,7 @@ public abstract class CombineBehavior : IFacilityBehavior
             QuantityBorder = 1,
             PriceBorder = priceBorder,
             pricePerOne = 1,
+            HaveToMoveQuantityBorder = true
         };
 
         facility.Ceo.PublishOffer(scaleableFacility.ScaleUpEquipmentBuyInOffer);

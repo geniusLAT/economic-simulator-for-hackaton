@@ -22,6 +22,8 @@ public class Offer
     //Will not sell cheaper, will not buy more expensive
     public float PriceBorder { get; set; }
 
+    public bool HaveToMoveQuantityBorder {  get; set; }
+
     public override string ToString()
     {
         var typeStr = "продаёт";
@@ -185,6 +187,11 @@ public class Offer
             WasUsedYesterday += (uint)quantity;
             accepter.moneyBalance -= totalPrice;
             Offerer.moneyBalance += totalPrice;
+
+            if (HaveToMoveQuantityBorder)
+            {
+                QuantityBorder -= (uint)quantity;
+            }
         }
         else
         {
@@ -231,6 +238,10 @@ public class Offer
             accepter.moneyBalance += totalPrice;
             Offerer.moneyBalance -= totalPrice;
 
+            if (HaveToMoveQuantityBorder)
+            {
+                QuantityBorder -= (uint)quantity;
+            }
         }
         Console.WriteLine($"Deal is closed");
         return true;

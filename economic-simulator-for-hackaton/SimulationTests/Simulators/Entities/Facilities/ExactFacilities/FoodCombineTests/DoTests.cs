@@ -5,7 +5,7 @@ using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
 using Simulation.Simulators;
 
-namespace SimulationTests.Simulators.Entities.Facilities.ExactFacilities.MiningCombineTests;
+namespace SimulationTests.Simulators.Entities.Facilities.ExactFacilities.FoodCombineTests;
 
 public class DoTests
 {
@@ -40,15 +40,15 @@ public class DoTests
         };
         _simulator.Characters.Add(character);
 
-        var MiningCombine = new MiningCombine()
+        var FoodCombine = new FoodCombine()
         {
-            Name = "Zeus Mining",
+            Name = "Zeus Farming",
             Place = station,
             Ceo = character,
             Owner = character,
         };
-        ceoBehavior.myFacilities.Add(MiningCombine);
-        station.facilities.Add(MiningCombine);
+        ceoBehavior.myFacilities.Add(FoodCombine);
+        station.facilities.Add(FoodCombine);
 
         //Act
         await _simulator.SkipDays(20);
@@ -56,10 +56,10 @@ public class DoTests
         //Assert
         Console.WriteLine(station.CargoView());
         Console.WriteLine(station.View());
-        Assert.That(MiningCombine.Behavior, Is.Not.Null);
+        Assert.That(FoodCombine.Behavior, Is.Not.Null);
         Assert.That(station.cargos.Count, Is.EqualTo(1));
         Assert.That(station.cargos.First().Quantity, Is.EqualTo(3));
-        Assert.That(station.cargos.First().Owner, Is.EqualTo(MiningCombine));
+        Assert.That(station.cargos.First().Owner, Is.EqualTo(FoodCombine));
     }
 
     [Test]
@@ -71,7 +71,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            MaxLevelOfMining = 2
+            IsSunny = true,
         };
 
         _simulator.spaceStations.Add(station);
@@ -86,21 +86,21 @@ public class DoTests
         };
         _simulator.Characters.Add(character);
 
-        var MiningCombine = new MiningCombine()
+        var FoodCombine = new FoodCombine()
         {
-            Name = "Zeus Mining",
+            Name = "Zeus Farming",
             Place = station,
             Ceo = character,
             Owner = character,
         };
-        ceoBehavior.myFacilities.Add(MiningCombine);
-        station.facilities.Add(MiningCombine);
+        ceoBehavior.myFacilities.Add(FoodCombine);
+        station.facilities.Add(FoodCombine);
 
         var Buyer = new Character()
         {
             Name = "Linda",
             Behavior = new StupidBuyerBehavior()
-            { TypeToBuy = ItemType.ore },
+            { TypeToBuy = ItemType.food },
             Place = station,
             moneyBalance = 100000
         };
@@ -121,13 +121,13 @@ public class DoTests
         //Assert
         Console.WriteLine(station.CargoView());
         Console.WriteLine(station.View());
-        Assert.That(MiningCombine.Behavior, Is.Not.Null);
+        Assert.That(FoodCombine.Behavior, Is.Not.Null);
         Assert.That(Buyer.moneyBalance, Is.LessThan(100000));
         Assert.That(Speculator.moneyBalance, Is.GreaterThan(100000));
-        Assert.That(MiningCombine.moneyBalance, Is.Positive);
+        Assert.That(FoodCombine.moneyBalance, Is.Positive);
         Assert.That(
             station.localOffers
-            .Where(offer => offer.ItemType == ItemType.miningEquipment)
+            .Where(offer => offer.ItemType == ItemType.farmingEquipment)
             .Count(), 
             Is.EqualTo(1)
         );
@@ -143,7 +143,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            MaxLevelOfMining = 2
+            IsSunny = true
         };
 
         _simulator.spaceStations.Add(station);
@@ -158,21 +158,21 @@ public class DoTests
         };
         _simulator.Characters.Add(character);
 
-        var MiningCombine = new MiningCombine()
+        var FoodCombine = new FoodCombine()
         {
-            Name = "Zeus Mining",
+            Name = "Zeus Farming",
             Place = station,
             Ceo = character,
             Owner = character,
         };
-        ceoBehavior.myFacilities.Add(MiningCombine);
-        station.facilities.Add(MiningCombine);
+        ceoBehavior.myFacilities.Add(FoodCombine);
+        station.facilities.Add(FoodCombine);
 
         var Buyer = new Character()
         {
             Name = "Linda",
             Behavior = new StupidBuyerBehavior()
-            { TypeToBuy = ItemType.ore },
+            { TypeToBuy = ItemType.food },
             Place = station,
             moneyBalance = 100000
         };
@@ -186,13 +186,13 @@ public class DoTests
         };
         _simulator.Characters.Add(Seller);
 
-        var miningEqipment = new Item()
+        var farmingEquipment = new Item()
         {
-            Type = ItemType.miningEquipment,
+            Type = ItemType.farmingEquipment,
             Owner = Seller,
             Quantity = 1
         };
-        station.cargos.Add(miningEqipment);
+        station.cargos.Add(farmingEquipment);
 
         var Speculator = new Character()
         {
@@ -209,15 +209,15 @@ public class DoTests
         //Assert
         Console.WriteLine(station.CargoView());
         Console.WriteLine(station.View());
-        Assert.That(MiningCombine.Behavior, Is.Not.Null);
+        Assert.That(FoodCombine.Behavior, Is.Not.Null);
         Assert.That(Buyer.moneyBalance, Is.LessThan(100000));
         Assert.That(Speculator.moneyBalance, Is.GreaterThan(100000));
-        Assert.That(MiningCombine.moneyBalance, Is.Positive);
-        Assert.That(MiningCombine.Level, Is.GreaterThan(1));
+        Assert.That(FoodCombine.moneyBalance, Is.Positive);
+        Assert.That(FoodCombine.Level, Is.GreaterThan(1));
     }
 
     [Test]
-    public async Task Do_SellsALot_ScalesUpTillBottom()
+    public async Task Do_SellsALot_ScalesUpAsMuchAsCan()
     {
         //Append
         var station = new SpaceStation()
@@ -225,7 +225,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            MaxLevelOfMining = 2
+            IsSunny = true
         };
 
         _simulator.spaceStations.Add(station);
@@ -240,21 +240,21 @@ public class DoTests
         };
         _simulator.Characters.Add(character);
 
-        var MiningCombine = new MiningCombine()
+        var FoodCombine = new FoodCombine()
         {
-            Name = "Zeus Mining",
+            Name = "Zeus Farming",
             Place = station,
             Ceo = character,
             Owner = character,
         };
-        ceoBehavior.myFacilities.Add(MiningCombine);
-        station.facilities.Add(MiningCombine);
+        ceoBehavior.myFacilities.Add(FoodCombine);
+        station.facilities.Add(FoodCombine);
 
         var Buyer = new Character()
         {
             Name = "Linda",
             Behavior = new StupidBuyerBehavior()
-            { TypeToBuy = ItemType.ore },
+            { TypeToBuy = ItemType.food },
             Place = station,
             moneyBalance = 100000
         };
@@ -268,13 +268,13 @@ public class DoTests
         };
         _simulator.Characters.Add(Seller);
 
-        var miningEqipment = new Item()
+        var farmingEquipment = new Item()
         {
-            Type = ItemType.miningEquipment,
+            Type = ItemType.farmingEquipment,
             Owner = Seller,
             Quantity = 10
         };
-        station.cargos.Add(miningEqipment);
+        station.cargos.Add(farmingEquipment);
 
         var Speculator = new Character()
         {
@@ -286,15 +286,15 @@ public class DoTests
         _simulator.Characters.Add(Speculator);
 
         //Act
-        await _simulator.SkipDays(200);
+        await _simulator.SkipDays(400);
 
         //Assert
         Console.WriteLine(station.CargoView());
         Console.WriteLine(station.View());
-        Assert.That(MiningCombine.Behavior, Is.Not.Null);
+        Assert.That(FoodCombine.Behavior, Is.Not.Null);
         Assert.That(Buyer.moneyBalance, Is.LessThan(100000));
         Assert.That(Speculator.moneyBalance, Is.GreaterThan(100000));
-        Assert.That(MiningCombine.moneyBalance, Is.Positive);
-        Assert.That(MiningCombine.Level, Is.EqualTo(2));
+        Assert.That(FoodCombine.moneyBalance, Is.Positive);
+        Assert.That(FoodCombine.Level, Is.GreaterThan(2));
     }
 }

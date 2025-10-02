@@ -71,7 +71,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            MaxLevelOfFuel = 5
+            MaxLevelOfFuel = 2
         };
 
         _simulator.spaceStations.Add(station);
@@ -143,7 +143,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            MaxLevelOfFuel = 5
+            MaxLevelOfFuel = 2
         };
 
         _simulator.spaceStations.Add(station);
@@ -225,7 +225,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            MaxLevelOfFuel = 5
+            MaxLevelOfFuel = 2
         };
 
         _simulator.spaceStations.Add(station);
@@ -295,6 +295,6 @@ public class DoTests
         Assert.That(Buyer.moneyBalance, Is.LessThan(100000));
         Assert.That(Speculator.moneyBalance, Is.GreaterThan(100000));
         Assert.That(FuelCombine.moneyBalance, Is.Positive);
-        Assert.That(FuelCombine.Level, Is.EqualTo(5));
+        Assert.That(FuelCombine.Level, Is.EqualTo(2));
     }
 }

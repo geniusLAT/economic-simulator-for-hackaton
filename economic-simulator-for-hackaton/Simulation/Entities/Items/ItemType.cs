@@ -7,5 +7,6 @@ public enum ItemType
     fuel,
     food,
     miningEquipment,
-    fuelProducingEquipment
+    fuelProducingEquipment,
+    farmingEquipment
 }

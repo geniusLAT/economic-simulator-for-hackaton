@@ -78,8 +78,12 @@ public class SpeculatorBehavior : IBehavior
             return false;
         }
 
-        return OfferToSell.accept(me,1, (SpaceStation)me.Place);
-
+        if(OfferToSell.accept(me, 1, (SpaceStation)me.Place))
+        {
+            return true;
+        }
+        Console.WriteLine($"{me.Name} bought but can not sell");
+        return false;
     }
 
     public void StopCurrentTrading(Character me)
@@ -156,6 +160,8 @@ public class SpeculatorBehavior : IBehavior
         Console.WriteLine($"Speculator have to choose between {options.Count} options");
         var bestOption = options
         .Where(theOption => theOption.Contrast is not null)
+        .Where(theOption => theOption.OfferForSpeculatorToBuy!.QuantityBorder > 0)
+        .Where(theOption => theOption.OfferForSpeculatorToSell!.QuantityBorder > 0)
         .Where(theOption => theOption.OfferForSpeculatorToBuy!.pricePerOne <= me.moneyBalance)       
         .Where(theOption => theOption.Contrast > 0)       
         .OrderByDescending(theOption => theOption.Contrast)
