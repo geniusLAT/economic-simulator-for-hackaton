@@ -28,6 +28,8 @@ public class Item
                 return "Оборудование для синтеза топлива";
             case ItemType.farmingEquipment:
                 return "Фермерское оборудование";
+            case ItemType.meltingEquipment:
+                return "Плавильное оборудование";
             default:
                 return "Нечто";
         }
