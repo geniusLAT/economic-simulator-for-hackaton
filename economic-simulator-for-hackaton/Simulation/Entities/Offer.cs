@@ -1,7 +1,5 @@
-﻿using Simulation.Entities.Characters;
-using Simulation.Entities.Items;
+﻿using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
-using System;
 
 namespace Simulation.Entities;
 
