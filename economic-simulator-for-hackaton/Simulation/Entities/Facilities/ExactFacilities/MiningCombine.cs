@@ -9,6 +9,8 @@ namespace Simulation.Entities.Facilities.Facilities;
 
 public class MiningCombine : ProducingFacility, IScaleableFacility
 {
+    public Offer? ScaleUpEquipmentBuyInOffer {  get; set; }
+
     public override ItemType TypeOfProduct => ItemType.ore;
 
     public uint Level { get; set; } = 1;

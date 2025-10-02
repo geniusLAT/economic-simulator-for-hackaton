@@ -1,4 +1,5 @@
 ﻿using Simulation.Entities.Locations;
+using System;
 
 namespace Simulation.Entities.Characters.BehaviorModel;
 
@@ -15,21 +16,28 @@ public class SpeculatorBehavior : IBehavior
         if (OfferToBuy is null || OfferToSell is null)
         {
             Console.WriteLine("null offers");
-            StopDicision();
+            StopCurrentTrading(me);
             return;
         }
 
        if (OfferToBuy.pricePerOne >= me.moneyBalance)
        {
             Console.WriteLine("money problem");
-            StopDicision();
+            StopCurrentTrading(me);
             return;
        }
 
         if (OfferToBuy.pricePerOne >= OfferToSell.pricePerOne)
         {
             Console.WriteLine("it will be bad deal");
-            StopDicision();
+            StopCurrentTrading(me);
+            return;
+        }
+
+        if (OfferToBuy.ItemToSell is null)
+        {
+            Console.WriteLine("Seller has no product for me");
+            StopCurrentTrading(me);
             return;
         }
 
@@ -74,8 +82,101 @@ public class SpeculatorBehavior : IBehavior
 
     }
 
-    public void StopDicision()
+    public void StopCurrentTrading(Character me)
     {
+        if (!FindNewPair(me))
+        {
+            Console.WriteLine($"Speculator {me.Name} has a " +
+                $"problem, no deal to be done");
+            //TODO stop speculating after some attempts
+        }
+    }
 
+    public bool FindNewPair(Character me)
+    {
+        Console.WriteLine($"Speculator is looking for new pair");
+        var station = me.Place as SpaceStation;
+        if (station is null)
+        {
+            return false;
+        }
+
+        List<SpeculationPair> options = [];
+
+        foreach (var offer in station.localOffers)
+        {
+            var type = offer.ItemType;
+            var option = (from theOption  in options 
+                            where theOption.ItemType == type
+                          select theOption).FirstOrDefault();
+
+            if (option is null)
+            {
+                Console.WriteLine($"Speculator found offer {offer} with new type ({offer.ItemType})");
+                options.Add(
+                    new()
+                        {
+                        OfferForSpeculatorToSell = !offer.IsOffererSelling ? offer : null,
+                        OfferForSpeculatorToBuy = offer.IsOffererSelling ? offer : null
+                    }
+                    );
+            }
+            else
+            {
+                Console.WriteLine($"Speculator found offer {offer} with mentioned before type ({offer.ItemType})");
+                if (offer.IsOffererSelling && option.OfferForSpeculatorToBuy is not null)
+                {
+                    //if speculator can buy cheaper he buy cheaper
+                    if(option.OfferForSpeculatorToBuy.pricePerOne < offer.pricePerOne)
+                    {
+                        option.OfferForSpeculatorToBuy = offer;
+                    }
+                }
+                if (offer.IsOffererSelling && option.OfferForSpeculatorToBuy is null)
+                {
+                    //first found offer to buy
+                    option.OfferForSpeculatorToBuy = offer;
+                }
+
+                if (!offer.IsOffererSelling && option.OfferForSpeculatorToSell is not null)
+                {
+                    //if speculator can sell more expensive he sell more expensive
+                    if (option.OfferForSpeculatorToSell.pricePerOne > offer.pricePerOne)
+                    {
+                        option.OfferForSpeculatorToSell = offer;
+                    }
+                }
+                if (!offer.IsOffererSelling && option.OfferForSpeculatorToSell is null)
+                {
+                    //first found offer to sell
+                    option.OfferForSpeculatorToSell = offer;
+                }
+            }
+        }
+        Console.WriteLine($"Speculator have to choose between {options.Count} options");
+        var bestOption = options
+        .Where(theOption => theOption.Contrast is not null)
+        .Where(theOption => theOption.OfferForSpeculatorToBuy!.pricePerOne <= me.moneyBalance)       
+        .Where(theOption => theOption.Contrast > 0)       
+        .OrderByDescending(theOption => theOption.Contrast)
+        .FirstOrDefault();
+
+        //Console.WriteLine($"total: {options.Count}");
+        //Console.WriteLine($"contrast: {options.Where(theOption => theOption.Contrast is not null).Count()}");
+        //Console.WriteLine($"enough money: {options.Where(theOption => theOption.Contrast is not null)
+        //.Where(theOption => theOption.OfferForSpeculatorToBuy!.pricePerOne <= me.moneyBalance).Count()}");
+
+        if (bestOption is not null)
+        {
+            OfferToBuy = bestOption.OfferForSpeculatorToBuy;
+            OfferToSell = bestOption.OfferForSpeculatorToSell;
+            Console.WriteLine($"Speculator {me.Name} is going to speculate" +
+                $" with {OfferToBuy!.ItemType}  between {OfferToBuy.Offerer.Name} " +
+                $"and {OfferToSell!.Offerer.Name}, waiting " +
+                $"for income near {bestOption.Contrast}");
+            return true;
+        };
+        Console.WriteLine($"Speculator have no options");
+        return false;
     }
 }

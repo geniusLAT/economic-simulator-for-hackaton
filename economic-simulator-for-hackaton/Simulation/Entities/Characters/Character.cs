@@ -26,6 +26,17 @@ public class Character : Actor
         return false;
     }
 
+    public bool CloseOffer(Offer offer)
+    {
+        if (Place is SpaceStation)
+        {
+            var station = (SpaceStation)Place;
+            station.localOffers.Remove(offer);
+            return true;
+        }
+        return false;
+    }
+
     public bool Disembark()
     {
         if (Place is SpaceShip)

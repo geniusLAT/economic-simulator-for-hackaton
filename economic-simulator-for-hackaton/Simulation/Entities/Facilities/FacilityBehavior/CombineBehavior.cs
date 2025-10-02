@@ -98,9 +98,20 @@ public abstract class CombineBehavior : IFacilityBehavior
                 QuantityBorder = ItemToSell.Quantity,
                 PriceBorder = 1,
                 pricePerOne = price,
-            };  
+            };
 
-            facility.Ceo.PublishOffer( productionOffer );
+            facility.Ceo.PublishOffer(productionOffer);
+        }
+        else
+        {
+
+            if (productionSellingOffer.ItemToSell is null)
+            {
+                productionSellingOffer.ItemToSell = (from cargo in station.cargos
+                                                     where cargo.Owner == facility && cargo.Type == producingFacility.TypeOfProduct
+                                                     select cargo).FirstOrDefault();    
+            }
+            productionSellingOffer.QuantityBorder = productionSellingOffer.ItemToSell?.Quantity ?? 0;
         }
         BuyRawMaterial(facility);    
         ScaleUpCheck(facility);
@@ -141,18 +152,30 @@ public abstract class CombineBehavior : IFacilityBehavior
                           select cargo).FirstOrDefault();
         if (ItemToSell is not null)
         {
+            ItemToSell.Quantity--;
+            if (ItemToSell.Quantity < 1)
+            {
+                station.cargos.Remove(ItemToSell);
+            }
+            if(scaleableFacility.ScaleUpEquipmentBuyInOffer is not null)
+            {
+                scaleableFacility.ScaleUpEquipmentBuyInOffer.QuantityBorder = 0;
+                facility.Ceo?.CloseOffer(scaleableFacility.ScaleUpEquipmentBuyInOffer);
+                facility.myOffers.Remove(scaleableFacility.ScaleUpEquipmentBuyInOffer);
+                Console.WriteLine($"Stopped buing {scaleableFacility.ScaleUpEquipmentBuyInOffer.ItemType} for scaling up");
+            }
             return scaleableFacility.ScaleUp();
         }
 
-        var ScaleUpBuyOrder = (from offer in station.localOffers
+        scaleableFacility.ScaleUpEquipmentBuyInOffer = (from offer in station.localOffers
                                       where offer.Offerer == facility 
                                       && !offer.IsOffererSelling
                                       && offer.ItemType == scaleableFacility.ScaleUpItem
                                select offer
                                       ).FirstOrDefault();
-        if (ScaleUpBuyOrder is not null) 
+        if (scaleableFacility.ScaleUpEquipmentBuyInOffer is not null) 
         {
-            ScaleUpBuyOrder.PriceBorder = facility.moneyBalance / 5;
+            scaleableFacility.ScaleUpEquipmentBuyInOffer.PriceBorder = facility.moneyBalance / 5;
             return false;
         }
 
@@ -161,7 +184,7 @@ public abstract class CombineBehavior : IFacilityBehavior
         {
             priceBorder = facility.moneyBalance / 5;
         }
-        var productionOffer = new Offer()
+        scaleableFacility.ScaleUpEquipmentBuyInOffer = new Offer()
         {
             Offerer = facility,
             IsOffererSelling = false,
@@ -172,7 +195,7 @@ public abstract class CombineBehavior : IFacilityBehavior
             pricePerOne = 1,
         };
 
-        facility.Ceo.PublishOffer(productionOffer);
+        facility.Ceo.PublishOffer(scaleableFacility.ScaleUpEquipmentBuyInOffer);
 
         return true;
     }

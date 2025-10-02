@@ -140,7 +140,7 @@ public class Offer
             Console.WriteLine($"IsOffererSelling");
             if (accepter.moneyBalance < totalPrice)
             {
-                Console.WriteLine($"not enogh money");
+                Console.WriteLine($"not enough money 2");
                 return false;
             }
 

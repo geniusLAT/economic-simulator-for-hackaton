@@ -68,5 +68,17 @@ public class StupidSellerBehavior : IBehavior
                 myOffers.Add(offer);
             }
         }
+
+        foreach (var offer in myOffers.ToArray())
+        {
+            if(offer.ItemToSell is null || offer.ItemToSell.Owner != me)
+            {
+                Console.WriteLine($"{me.Name} stopped selling {offer.ItemType}, sold out");
+                offer.ItemToSell = null;
+                offer.QuantityBorder = 0;
+                myOffers.Remove(offer);
+                me.CloseOffer(offer);
+            }
+        }
     }
 }

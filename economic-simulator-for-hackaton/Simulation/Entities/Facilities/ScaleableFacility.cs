@@ -6,6 +6,8 @@ namespace Simulation.Entities.Facilities;
 
 public interface IScaleableFacility 
 {
+    public virtual Offer? ScaleUpEquipmentBuyInOffer { get { return null; } set { } }
+
     public virtual ItemType ScaleUpItem => ItemType.miningEquipment;
 
     public uint Level { get; set; }
