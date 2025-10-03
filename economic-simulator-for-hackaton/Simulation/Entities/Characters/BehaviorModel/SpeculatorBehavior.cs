@@ -73,7 +73,7 @@ public class SpeculatorBehavior : IBehavior
 
     public bool Speculate(Character me)
     {
-        Console.WriteLine("Speculating");
+        Console.WriteLine($"Speculating {OfferToBuy?.ItemType.ToString() ?? "Nothing"}");
         if (!OfferToBuy.accept(me, 1, (SpaceStation)me.Place))
         {
             Console.WriteLine($"Buing was failed");
@@ -190,7 +190,7 @@ public class SpeculatorBehavior : IBehavior
 
     void TrySellUseless(Character me)
     {
-        Console.WriteLine($"Speculator is looking for new pair");
+        Console.WriteLine($"Speculator is selling useless");
         var station = me.Place as SpaceStation;
         if (station is null)
         {

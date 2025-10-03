@@ -53,7 +53,8 @@ public abstract class CombineBehavior : IFacilityBehavior
                     Offerer = facility,
                     ItemType = material.ItemType,
                     IsOffererSelling = false,
-                    pricePerOne = material.CostPrice
+                    pricePerOne = material.CostPrice,
+                    PriceBorder = facility.moneyBalance
                 };
                 Console.WriteLine($"{facility.Name} buys {material.ItemType}");
                 facility.Ceo.PublishOffer(materialOffer);
@@ -90,6 +91,7 @@ public abstract class CombineBehavior : IFacilityBehavior
 
                     material.RememberedMarketPrice = materialOffer.pricePerOne;
                     material.StoredUnits = materialStock.Quantity;
+                    materialOffer.PriceBorder = facility.moneyBalance;
                 }
             }
         }
@@ -175,6 +177,7 @@ public abstract class CombineBehavior : IFacilityBehavior
             if (facility.moneyBalance > 0)
             {
                 price = facility.moneyBalance / mustBeStored;
+                Console.WriteLine($"start price {price}");
             }
             productionSellingOffer = new Offer()
             {

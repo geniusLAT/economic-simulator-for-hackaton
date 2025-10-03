@@ -46,6 +46,7 @@ public class DoTests
             Place = station,
             Ceo = character,
             Owner = character,
+            moneyBalance = 1000
         };
         ceoBehavior.myFacilities.Add(MeltingCombine);
         station.facilities.Add(MeltingCombine);
@@ -114,11 +115,27 @@ public class DoTests
         ceoBehavior.myFacilities.Add(MeltingCombine);
         station.facilities.Add(MeltingCombine);
 
+        var ore = new Item()
+        {
+            Type = ItemType.ore,
+            Owner = MeltingCombine,
+            Quantity = 2000
+        };
+        station.cargos.Add(ore);
+
+        var fuel = new Item()
+        {
+            Type = ItemType.fuel,
+            Owner = MeltingCombine,
+            Quantity = 2000
+        };
+        station.cargos.Add(fuel);
+
         var Buyer = new Character()
         {
             Name = "Linda",
             Behavior = new StupidBuyerBehavior()
-            { TypeToBuy = ItemType.food },
+            { TypeToBuy = ItemType.metal },
             Place = station,
             moneyBalance = 100000
         };
@@ -134,7 +151,7 @@ public class DoTests
         _simulator.Characters.Add(Speculator);
 
         //Act
-        await _simulator.SkipDays(20);
+        await _simulator.SkipDays(60);
 
         //Assert
         Console.WriteLine(station.CargoView());
@@ -145,7 +162,7 @@ public class DoTests
         Assert.That(MeltingCombine.moneyBalance, Is.Positive);
         Assert.That(
             station.localOffers
-            .Where(offer => offer.ItemType == ItemType.farmingEquipment)
+            .Where(offer => offer.ItemType == ItemType.meltingEquipment)
             .Count(), 
             Is.EqualTo(1)
         );
@@ -161,7 +178,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            IsSunny = true
+            IsSunny = true,
         };
 
         _simulator.spaceStations.Add(station);
@@ -186,11 +203,27 @@ public class DoTests
         ceoBehavior.myFacilities.Add(MeltingCombine);
         station.facilities.Add(MeltingCombine);
 
+        var ore = new Item()
+        {
+            Type = ItemType.ore,
+            Owner = MeltingCombine,
+            Quantity = 2000
+        };
+        station.cargos.Add(ore);
+
+        var fuel = new Item()
+        {
+            Type = ItemType.fuel,
+            Owner = MeltingCombine,
+            Quantity = 2000
+        };
+        station.cargos.Add(fuel);
+
         var Buyer = new Character()
         {
             Name = "Linda",
             Behavior = new StupidBuyerBehavior()
-            { TypeToBuy = ItemType.food },
+            { TypeToBuy = ItemType.metal },
             Place = station,
             moneyBalance = 100000
         };
@@ -204,13 +237,13 @@ public class DoTests
         };
         _simulator.Characters.Add(Seller);
 
-        var farmingEquipment = new Item()
+        var meltingEquipment = new Item()
         {
-            Type = ItemType.farmingEquipment,
+            Type = ItemType.meltingEquipment,
             Owner = Seller,
             Quantity = 1
         };
-        station.cargos.Add(farmingEquipment);
+        station.cargos.Add(meltingEquipment);
 
         var Speculator = new Character()
         {
@@ -222,7 +255,7 @@ public class DoTests
         _simulator.Characters.Add(Speculator);
 
         //Act
-        await _simulator.SkipDays(20);
+        await _simulator.SkipDays(60);
 
         //Assert
         Console.WriteLine(station.CargoView());
@@ -243,7 +276,7 @@ public class DoTests
             coordX = 0,
             coordY = 0,
             Name = "Zeus II",
-            IsSunny = true
+            IsSunny = true,
         };
 
         _simulator.spaceStations.Add(station);
@@ -268,11 +301,27 @@ public class DoTests
         ceoBehavior.myFacilities.Add(MeltingCombine);
         station.facilities.Add(MeltingCombine);
 
+        var ore = new Item()
+        {
+            Type = ItemType.ore,
+            Owner = MeltingCombine,
+            Quantity = 2000
+        };
+        station.cargos.Add(ore);
+
+        var fuel = new Item()
+        {
+            Type = ItemType.fuel,
+            Owner = MeltingCombine,
+            Quantity = 2000
+        };
+        station.cargos.Add(fuel);
+
         var Buyer = new Character()
         {
             Name = "Linda",
             Behavior = new StupidBuyerBehavior()
-            { TypeToBuy = ItemType.food },
+            { TypeToBuy = ItemType.metal },
             Place = station,
             moneyBalance = 100000
         };
@@ -286,13 +335,13 @@ public class DoTests
         };
         _simulator.Characters.Add(Seller);
 
-        var farmingEquipment = new Item()
+        var meltingEquipment = new Item()
         {
-            Type = ItemType.farmingEquipment,
+            Type = ItemType.meltingEquipment,
             Owner = Seller,
             Quantity = 10
         };
-        station.cargos.Add(farmingEquipment);
+        station.cargos.Add(meltingEquipment);
 
         var Speculator = new Character()
         {
