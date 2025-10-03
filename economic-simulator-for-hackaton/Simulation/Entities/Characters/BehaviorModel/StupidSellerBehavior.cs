@@ -60,7 +60,9 @@ public class StupidSellerBehavior : IBehavior
                 IsOffererSelling = true,
                 //In base NPC will try to double his balance
                 pricePerOne = price,
-                PriceBorder = 0
+                PriceBorder = 0,
+                QuantityBorder = newOfferCandidate.Quantity,
+                HaveToMoveQuantityBorder = true
             };
 
             if (me.PublishOffer(offer))

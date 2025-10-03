@@ -364,4 +364,107 @@ public class DoTests
         Assert.That(MeltingCombine.moneyBalance, Is.Positive);
         Assert.That(MeltingCombine.Level, Is.GreaterThan(2));
     }
+
+    [Test]
+    public async Task Do_SellsALot_BuysRawMaterials()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II",
+            IsSunny = true,
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var ceoBehavior = new CeoBehavior();
+
+        var character = new Character()
+        {
+            Name = "Joe Doe",
+            Behavior = ceoBehavior,
+            Place = station
+        };
+        _simulator.Characters.Add(character);
+
+        var MeltingCombine = new MeltingCombine()
+        {
+            Name = "Zeus Farming",
+            Place = station,
+            Ceo = character,
+            Owner = character,
+            moneyBalance = 100
+        };
+        ceoBehavior.myFacilities.Add(MeltingCombine);
+        station.facilities.Add(MeltingCombine);
+
+        var Buyer = new Character()
+        {
+            Name = "Linda",
+            Behavior = new StupidBuyerBehavior()
+            { TypeToBuy = ItemType.metal },
+            Place = station,
+            moneyBalance = 100000
+        };
+        _simulator.Characters.Add(Buyer);
+
+        var Seller = new Character()
+        {
+            Name = "Fred",
+            Behavior = new StupidSellerBehavior(),
+            Place = station
+        };
+        _simulator.Characters.Add(Seller);
+
+        var meltingEquipment = new Item()
+        {
+            Type = ItemType.meltingEquipment,
+            Owner = Seller,
+            Quantity = 10
+        };
+        station.cargos.Add(meltingEquipment);
+
+        var ore = new Item()
+        {
+            Type = ItemType.ore,
+            Owner = Seller,
+            Quantity = 20000
+        };
+        station.cargos.Add(ore);
+
+        var fuel = new Item()
+        {
+            Type = ItemType.fuel,
+            Owner = Seller,
+            Quantity = 2000
+        };
+        station.cargos.Add(fuel);
+
+        var Speculator = new Character()
+        {
+            Name = "German",
+            Behavior = new SpeculatorBehavior(),
+            Place = station,
+            moneyBalance = 100000
+        };
+        _simulator.Characters.Add(Speculator);
+
+        //Act
+        await _simulator.SkipDays(400);
+
+        //Assert
+        Console.WriteLine(station.CargoView());
+        Console.WriteLine(station.View());
+        Assert.That(MeltingCombine.Behavior, Is.Not.Null);
+        Assert.That(Buyer.moneyBalance, Is.LessThan(100000));
+        Assert.That(Speculator.moneyBalance, Is.GreaterThan(100000));
+        Assert.That(MeltingCombine.moneyBalance, Is.Positive);
+        Assert.That(MeltingCombine.Level, Is.GreaterThan(10));
+
+        var sellerCargos = station.cargos.Where(cargo => cargo.Owner == Seller);
+
+        Assert.That(sellerCargos.Count(), Is.LessThan(3));
+    }
 }

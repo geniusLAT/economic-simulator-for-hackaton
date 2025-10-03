@@ -40,7 +40,8 @@ public class StupidBuyerBehavior : IBehavior
             ItemType = TypeToBuy,
             IsOffererSelling = false,
             pricePerOne = price,
-            PriceBorder = me.moneyBalance
+            PriceBorder = me.moneyBalance,
+            QuantityBorder = null
         };
 
         if (me.PublishOffer(offer))

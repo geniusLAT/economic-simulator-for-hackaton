@@ -54,7 +54,9 @@ public abstract class CombineBehavior : IFacilityBehavior
                     ItemType = material.ItemType,
                     IsOffererSelling = false,
                     pricePerOne = material.CostPrice,
-                    PriceBorder = facility.moneyBalance
+                    PriceBorder = facility.moneyBalance,
+                    HaveToMoveQuantityBorder = true,
+                    QuantityBorder = material.NeededPerProduction
                 };
                 Console.WriteLine($"{facility.Name} buys {material.ItemType}");
                 facility.Ceo.PublishOffer(materialOffer);
@@ -92,6 +94,20 @@ public abstract class CombineBehavior : IFacilityBehavior
                     material.RememberedMarketPrice = materialOffer.pricePerOne;
                     material.StoredUnits = materialStock.Quantity;
                     materialOffer.PriceBorder = facility.moneyBalance;
+
+                    //buys per day not more than can spend that day and next
+                    var okToBuy=  2 * material.NeededPerProduction;
+                    var scalableFacility = facility as IScaleableFacility;
+                    if (scalableFacility != null)
+                    {
+                        okToBuy = 2 * scalableFacility.Level * material.NeededPerProduction;
+                    }
+                    if(materialStock.Quantity > 5 * okToBuy)
+                    {
+                        okToBuy = 0;
+                    }
+
+                    materialOffer.QuantityBorder = okToBuy;
                 }
             }
         }

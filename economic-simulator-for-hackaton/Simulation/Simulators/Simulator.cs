@@ -17,6 +17,8 @@ public class Simulator
 
     public uint SecondsInCycle { get; set; } = 60;
 
+    public ulong dayCounter { get; set; } = 0;
+
     public async Task GenerateWorldAsync()
     {
 
@@ -24,7 +26,7 @@ public class Simulator
 
     public async Task FinishDay()
     {
-        Console.WriteLine("Finishing day");
+        Console.WriteLine($"\n\n     Finishing day  {dayCounter++} ");
 
         foreach (var character in Characters)
         {

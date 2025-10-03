@@ -9,64 +9,86 @@ public class SpeculatorBehavior : IBehavior
 
     public Offer? OfferToBuy;
 
+    public bool BadDay {  get; set; } = false;
+
     public void Do(Character me)
     {
-
         Console.WriteLine("speculator is here");
         TrySellUseless(me);
+        BadDay = true;
+        var counter = 0;
+        while (FindNewPair(me) && counter++ < 10)
+        {
+            HaveADeal(me);
+        }
 
+        if (BadDay)
+        {
+            {
+                Console.WriteLine($"Speculator {me.Name} has a " +
+                    $"problem, no deal to be done");
+                //TODO stop speculating after some attempts
+            }
+        }
+    }
+
+    public void HaveADeal(Character me)
+    {
         if (OfferToBuy is null || OfferToSell is null)
         {
             Console.WriteLine("null offers");
-            StopCurrentTrading(me);
             return;
         }
 
-       if (OfferToBuy.pricePerOne >= me.moneyBalance)
-       {
+        if (OfferToBuy.pricePerOne >= me.moneyBalance)
+        {
             Console.WriteLine("money problem");
-            StopCurrentTrading(me);
             return;
-       }
+        }
 
         if (OfferToBuy.pricePerOne >= OfferToSell.pricePerOne)
         {
             Console.WriteLine("it will be bad deal");
-            StopCurrentTrading(me);
             return;
         }
 
         if (OfferToBuy.ItemToSell is null)
         {
             Console.WriteLine("Seller has no product for me");
-            StopCurrentTrading(me);
             return;
         }
 
         var cargoQuantity = OfferToSell.QuantityBorder;
-        if (cargoQuantity > OfferToBuy.QuantityBorder)
+        if (
+            (OfferToBuy.QuantityBorder is not null
+            && cargoQuantity > OfferToBuy.QuantityBorder)
+            || cargoQuantity is null
+            )
         {
             cargoQuantity = OfferToBuy.QuantityBorder;
         }
-
+        Console.WriteLine($"Speculator can buy {OfferToBuy.QuantityBorder} and can sell {OfferToSell.QuantityBorder}");
         if (cargoQuantity is not null)
         {
             for (int i = 0; i < cargoQuantity; i++)
             {
                 if (!Speculate(me))
                 {
-                    Console.WriteLine($"CQ, Speculating was over, new balance is {me.moneyBalance}");
+                    Console.WriteLine($"Controlled speculating was over, new balance is {me.moneyBalance}");
                     return;
                 }
             }
         }
-
-        while (true)
+        else
         {
-            if (!Speculate(me))
+            Console.WriteLine($"Wild speculating");
+            while (true)
             {
-                Console.WriteLine($"Speculating was over, new balance is {me.moneyBalance}");
-                return;
+                if (!Speculate(me))
+                {
+                    Console.WriteLine($"Speculating was over, new balance is {me.moneyBalance}");
+                    return;
+                }
             }
         }
     }
@@ -82,6 +104,7 @@ public class SpeculatorBehavior : IBehavior
 
         if(OfferToSell.accept(me, 1, (SpaceStation)me.Place))
         {
+            BadDay=false;
             return true;
         }
         Console.WriteLine($"{me.Name} bought but can not sell");
@@ -90,12 +113,12 @@ public class SpeculatorBehavior : IBehavior
 
     public void StopCurrentTrading(Character me)
     {
-        if (!FindNewPair(me))
-        {
-            Console.WriteLine($"Speculator {me.Name} has a " +
-                $"problem, no deal to be done");
-            //TODO stop speculating after some attempts
-        }
+        //if (!FindNewPair(me))
+        //{
+        //    Console.WriteLine($"Speculator {me.Name} has a " +
+        //        $"problem, no deal to be done");
+        //    //TODO stop speculating after some attempts
+        //}
     }
 
     public bool FindNewPair(Character me)
@@ -165,6 +188,8 @@ public class SpeculatorBehavior : IBehavior
         .Where(theOption => (theOption.OfferForSpeculatorToBuy!.QuantityBorder ?? uint.MaxValue ) > 0)
         .Where(theOption => (theOption.OfferForSpeculatorToSell!.QuantityBorder ?? uint.MaxValue) > 0)
         .Where(theOption => theOption.OfferForSpeculatorToBuy!.pricePerOne <= me.moneyBalance)       
+        .Where(theOption => theOption.OfferForSpeculatorToBuy!.ItemToSell is not null)       
+        .Where(theOption => theOption.OfferForSpeculatorToBuy!.ItemToSell!.Quantity > 0)       
         .Where(theOption => theOption.Contrast > 0)       
         .OrderByDescending(theOption => theOption.Contrast)
         .FirstOrDefault();
