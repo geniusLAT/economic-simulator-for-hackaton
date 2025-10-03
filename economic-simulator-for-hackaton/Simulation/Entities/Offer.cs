@@ -67,7 +67,7 @@ public class Offer
 
     public float UpdatePrice()
     {
-        Console.WriteLine($"    {Offerer.Name} updating price");
+        Console.WriteLine($"    {Offerer.Name} updating price for {ItemType}");
         if (IsOffererSelling)
         {
             if(WasUsedYesterday == 0)
@@ -75,6 +75,7 @@ public class Offer
                 pricePerOne -= pricePerOne * 0.1f;
                 if (pricePerOne < PriceBorder)
                 {
+                    Console.WriteLine($"price {pricePerOne} is on border {PriceBorder} ");
                     pricePerOne = PriceBorder;
                 }
                 WasUsedYesterday = 0;

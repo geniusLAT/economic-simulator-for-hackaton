@@ -162,8 +162,8 @@ public class SpeculatorBehavior : IBehavior
         Console.WriteLine($"Speculator have to choose between {options.Count} options");
         var bestOption = options
         .Where(theOption => theOption.Contrast is not null)
-        .Where(theOption => theOption.OfferForSpeculatorToBuy!.QuantityBorder > 0)
-        .Where(theOption => theOption.OfferForSpeculatorToSell!.QuantityBorder > 0)
+        .Where(theOption => (theOption.OfferForSpeculatorToBuy!.QuantityBorder ?? uint.MaxValue ) > 0)
+        .Where(theOption => (theOption.OfferForSpeculatorToSell!.QuantityBorder ?? uint.MaxValue) > 0)
         .Where(theOption => theOption.OfferForSpeculatorToBuy!.pricePerOne <= me.moneyBalance)       
         .Where(theOption => theOption.Contrast > 0)       
         .OrderByDescending(theOption => theOption.Contrast)
@@ -222,7 +222,7 @@ public class SpeculatorBehavior : IBehavior
 
             if (bestOffer is not null)
             {
-                int quantity =(int) Math.Min((long)cargo.Quantity, (long)bestOffer.QuantityBorder);
+                int quantity =(int) Math.Min((long)cargo.Quantity, (long)(bestOffer.QuantityBorder ?? uint.MaxValue));
                 Console.WriteLine($"Speculator {me.Name} sold useless" +
                     $" {quantity} items of {cargo.Type} for {bestPrice} per one");
                 bestOffer.accept(me, quantity, station);

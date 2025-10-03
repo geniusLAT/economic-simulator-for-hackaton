@@ -1,16 +1,98 @@
-﻿using Simulation.Entities.Locations;
+﻿using Simulation.Entities.Facilities.Facilities;
+using Simulation.Entities.Items;
+using Simulation.Entities.Locations;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Simulation.Entities.Facilities.FacilityBehavior;
 
 public abstract class CombineBehavior : IFacilityBehavior
 {
+    public List<StoredRawMaterial> Materials { get; set; } = [];
+
     public virtual uint CountRawMaterialsForProducing(Facility facility)
     {
-        return uint.MaxValue;
+        Console.WriteLine("CountRawMaterialsForProducing");
+        uint count = uint.MaxValue;
+        
+        foreach (StoredRawMaterial material in Materials)
+        {
+            var storedMaterial = facility.Place.cargos
+            .Where(cargo => cargo.Owner == facility)
+            .Where(cargo => cargo.Type == material.ItemType)
+            .FirstOrDefault();
+            if (storedMaterial is null)
+            {
+                Console.WriteLine($"{facility.Name} has no {material.ItemType}, no production can be done");
+                return 0;
+            }
+
+            var materialEnoughFor = storedMaterial.Quantity / material.NeededPerProduction;
+            if (count > materialEnoughFor)
+            {
+                count = (uint)materialEnoughFor;
+            }
+            Console.WriteLine($"{facility.Name} has enough {material.ItemType} for {materialEnoughFor} productions");
+        }
+
+        Console.WriteLine($"{facility.Name} has enough materials for {count} productions");
+        return count;
     }
 
     public virtual bool BuyRawMaterial(Facility facility)
     {
+        foreach (StoredRawMaterial material in Materials)
+        {
+            var materialOffer = facility.myOffers
+            .Where(offer => offer.ItemType == material.ItemType)
+            .FirstOrDefault();
+
+            if (materialOffer is null)
+            {
+                materialOffer = new()
+                {
+                    Offerer = facility,
+                    ItemType = material.ItemType,
+                    IsOffererSelling = false,
+                    pricePerOne = material.CostPrice
+                };
+                Console.WriteLine($"{facility.Name} buys {material.ItemType}");
+                facility.Ceo.PublishOffer(materialOffer);
+                facility.myOffers.Add(materialOffer);
+            }
+            else
+            {
+                var materialStock = facility.Place.cargos
+               .Where(cargo => cargo.Type == material.ItemType)
+               .Where(cargo => cargo.Owner == facility)
+               .FirstOrDefault();
+
+                if (materialStock is not null && materialStock.Quantity > 0)
+                {
+                    var boughtFromLastCheck = materialStock.Quantity - material.StoredUnits;
+                    if (boughtFromLastCheck < 0) boughtFromLastCheck = 0;
+                    var boughtTodayStock = materialOffer.WasUsedYesterday;
+                    var boughtPreviousDay = boughtFromLastCheck - boughtTodayStock;
+                    var sum = material.StoredUnits * material.CostPrice
+                        + boughtTodayStock * materialOffer.pricePerOne
+                        + boughtPreviousDay * material.RememberedMarketPrice;
+
+                    Console.WriteLine($"sum = {material.StoredUnits}(material.StoredUnits) * " +
+                        $"{material.CostPrice}(material.CostPrice)\n +" +
+                        $"{boughtTodayStock}(boughtTodayStock) * " +
+                        $"{materialOffer.pricePerOne}(materialOffer.pricePerOne)\n + " +
+                        $"{boughtPreviousDay}(boughtPreviousDay) * " +
+                        $"{material.RememberedMarketPrice}(material.RememberedMarketPrice)");
+
+
+
+                    material.CostPrice = sum / materialStock.Quantity;
+                    Console.WriteLine($"sum = {sum}, quantity = {materialStock.Quantity}, {material.ItemType} costPrice is {material.CostPrice}");
+
+                    material.RememberedMarketPrice = materialOffer.pricePerOne;
+                    material.StoredUnits = materialStock.Quantity;
+                }
+            }
+        }
         return true;
     }
 
@@ -33,14 +115,20 @@ public abstract class CombineBehavior : IFacilityBehavior
             Console.WriteLine("CEO is far away");
             return;
         }
+        BuyRawMaterial(facility);
+        ProcessProduction(facility, station);
+        ScaleUpCheck(facility);
+    }
 
+    public virtual void ProcessProduction(Facility facility, SpaceStation station)
+    {
         var producingFacility = facility as ProducingFacility;
         if (producingFacility is null)
         {
             return;
         }
         var ItemToSell = (from cargo in station.cargos
-                      where cargo.Owner == facility && cargo.Type == producingFacility.TypeOfProduct
+                          where cargo.Owner == facility && cargo.Type == producingFacility.TypeOfProduct
                           select cargo).FirstOrDefault();
 
         var mustBeStored = (uint)3;
@@ -60,7 +148,7 @@ public abstract class CombineBehavior : IFacilityBehavior
         Console.WriteLine($"{facility.Name} can produce {canProduce}, " +
             $"wanna produce {wantToProduce}, " +
             $"will produce {producingToday}");
-        producingFacility.Produce(producingToday);
+        ManageProduction(producingFacility, producingToday);
 
         var productionSellingOffer = (from offer in station.localOffers
                                       where offer.Offerer == facility && offer.IsOffererSelling
@@ -88,7 +176,7 @@ public abstract class CombineBehavior : IFacilityBehavior
             {
                 price = facility.moneyBalance / mustBeStored;
             }
-            var productionOffer = new Offer()
+            productionSellingOffer = new Offer()
             {
                 Offerer = producingFacility,
                 IsOffererSelling = true,
@@ -100,7 +188,7 @@ public abstract class CombineBehavior : IFacilityBehavior
                 HaveToMoveQuantityBorder = true
             };
 
-            facility.Ceo.PublishOffer(productionOffer);
+            facility.Ceo!.PublishOffer(productionSellingOffer);
         }
         else
         {
@@ -109,13 +197,43 @@ public abstract class CombineBehavior : IFacilityBehavior
             {
                 productionSellingOffer.ItemToSell = (from cargo in station.cargos
                                                      where cargo.Owner == facility && cargo.Type == producingFacility.TypeOfProduct
-                                                     select cargo).FirstOrDefault();    
+                                                     select cargo).FirstOrDefault();
             }
             productionSellingOffer.QuantityBorder = productionSellingOffer.ItemToSell?.Quantity ?? 0;
         }
-        BuyRawMaterial(facility);    
-        ScaleUpCheck(facility);
-      
+        productionSellingOffer.PriceBorder = CalculateUnitCost();
+    }
+
+    public virtual float CalculateUnitCost()
+    {
+        var UnitCost = 0f;
+        foreach (var material in Materials)
+        {
+            Console.WriteLine($"{material.ItemType} unit cost is {material.CostPrice * material.NeededPerProduction}");
+            UnitCost += material.CostPrice * material.NeededPerProduction;
+        }
+        Console.WriteLine($"total unit cost is {UnitCost}");
+        return UnitCost;
+    }
+
+    public virtual void ManageProduction(ProducingFacility producingFacility, uint producingToday)
+    {
+        if (!producingFacility.Produce(producingToday))
+        {
+            return;
+        }
+        foreach (var material in Materials)
+        {
+            var spentMaterials = producingToday * material.NeededPerProduction;
+            if (spentMaterials > material.StoredUnits)
+            {
+                material.StoredUnits = 0;
+            }
+            else
+            {
+                material.StoredUnits -= spentMaterials;
+            }
+        }
     }
 
     public virtual bool ScaleUpCheck(Facility facility)

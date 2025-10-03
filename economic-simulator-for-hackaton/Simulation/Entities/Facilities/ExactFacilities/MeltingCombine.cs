@@ -10,11 +10,11 @@ public class MeltingCombine : ProducingFacility, IScaleableFacility
 
     public uint Level { get; set; } = 1;
 
-    public virtual ItemType ScaleUpItem => ItemType.meltingEquipment;
+    public ItemType ScaleUpItem => ItemType.meltingEquipment;
 
     public const uint FuelPerProduce = 1;
 
-    public const uint OrePerProduce = 1;
+    public const uint OrePerProduce = 3;
 
     public override bool Produce(uint quantity)
     {

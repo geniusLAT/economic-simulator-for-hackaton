@@ -44,6 +44,9 @@ public class CeoBehavior : IBehavior
             case FoodCombine combine:
                 combine.Behavior = new FoodCombineBehavior();
                 return true;
+            case MeltingCombine combine:
+                combine.Behavior = new MeltingCombineBehavior();
+                return true;
             default:
                 return false;
         }
