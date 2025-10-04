@@ -74,7 +74,7 @@ public class EnthusiastBehavior : IBehavior
             foreach (var cargo in necessaryCargo)
             {
                 var type = StarterUp.GetFacilityType(cargo.Type);
-                MyFacility =  StarterUp.StartUp(me, type, me, cargo, "name");
+                MyFacility =  StarterUp.StartUp(me, type, me, cargo, $"{me.Name}'s facility");
                 if (MyFacility is not null)
                 {
                     return true;
@@ -222,9 +222,11 @@ public class EnthusiastBehavior : IBehavior
             }
         }
 
+        station.facilities.Add(facility);
         me.Behavior = new CeoBehavior()
         { 
             myFacilities = [ facility ]
         };
+        facility.Ceo = me;
     }
 }
