@@ -373,6 +373,16 @@ public class PlayerPromptProcessor
         {
             return player.Place?.CargoView() ?? "Пустота и ничего более";
         }
+        if (words[1] == "предприятия")
+        {
+            var station = player.Place as SpaceStation;
+            if (station is null)
+            {
+                return "Предприятия бывают только на станциях, вы не на станции";
+            }
+
+            return station.FacilitiesView();
+        }
 
         return "ошибка команды осмотра";
     }

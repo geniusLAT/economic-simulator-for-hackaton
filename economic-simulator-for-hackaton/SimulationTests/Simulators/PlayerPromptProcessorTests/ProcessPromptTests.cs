@@ -1,5 +1,6 @@
 ﻿using Simulation.Entities;
 using Simulation.Entities.Characters;
+using Simulation.Entities.Facilities.Facilities;
 using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
 using Simulation.Simulators;
@@ -380,6 +381,86 @@ public class ProcessPromptTests
 Владелец: Joe Doe
 Капитан: Joe Doe
 Посажен на станции Zeus II
+";
+        Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
+    }
+
+    [Test]
+    public async Task ProcessPrompt_PlayerFacilityViewStationWithFiveFacilities()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var pLayer = new PLayer()
+        {
+            Name = "Joe Doe",
+            Place = station
+        };
+
+        _simulator.Characters.Add(pLayer);
+        _simulator.PLayerCharacters.Add(pLayer);
+
+        var f1 = new MiningCombine()
+        {
+            Owner = pLayer,
+            Ceo = pLayer,
+            Place = station
+        };
+        station.facilities.Add(f1);
+
+        var f2 = new FoodCombine()
+        {
+            Owner = pLayer,
+            Ceo = pLayer,
+            Place = station
+        };
+        station.facilities.Add(f2);
+
+        var f3 = new MeltingCombine()
+        {
+            Owner = pLayer,
+            Ceo = pLayer,
+            Place = station
+        };
+        station.facilities.Add(f3);
+
+        var f4 = new FuelCombine()
+        {
+            Owner = pLayer,
+            Ceo = pLayer,
+            Place = station
+        };
+        station.facilities.Add(f4);
+
+        var f5 = new MiningCombine()
+        {
+            Owner = pLayer,
+            Ceo = pLayer,
+            Place = station
+        };
+        station.facilities.Add(f5);
+
+        //Act
+        var result = await _playerPromptProcessor.ProcessPromptAsync("осмотр предприятия", pLayer.Guid);
+
+        //Assert
+        Console.WriteLine(result);
+
+        var expected = @"Предприятий основано: 5
+|Номер|Название |Владелец|Директор|Род деятельности       |
+|-----|---------|--------|--------|-----------------------|
+|1    |Новое Имя|Joe Doe |Joe Doe |Шахта                  |
+|2    |Новое Имя|Joe Doe |Joe Doe |Продуктовый комбинат   |
+|3    |Новое Имя|Joe Doe |Joe Doe |Рудоплавильный комбинат|
+|4    |Новое Имя|Joe Doe |Joe Doe |Топливный комбинат     |
+|5    |Новое Имя|Joe Doe |Joe Doe |Шахта                  |
 ";
         Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
     }

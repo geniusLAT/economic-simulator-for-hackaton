@@ -83,7 +83,31 @@ public class SpaceStation : Location
         return result + drawer.Draw(true);
     }
 
-    public void Enthusiastic()
+    public string FacilitiesView()
+    {
+        var result = $"Предприятий основано: {facilities.Count}\n";
+        if (facilities.Count < 1)
+        {
+            return result;
+        }
+
+        var drawer = new TableDrawer();
+        drawer.AddLine(new List<string>() {
+            "Номер",
+        "Название ",
+        "Владелец",
+        "Директор",
+        "Род деятельности"
+        });
+
+        for (int i = 0; i < facilities.Count; i++)
+        {
+            drawer.AddLine(facilities[i].ToStringList(i + 1));
+        }
+        return result + drawer.Draw(true);
+    }
+
+    public void SpeculatorSpawnCheck()
     {
         var offersToSell = (from offer in localOffers
                             where offer.IsOffererSelling

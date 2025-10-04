@@ -1,5 +1,6 @@
 ﻿using Simulation.Entities.Characters;
 using Simulation.Entities.Locations;
+using Simulation.Utilities;
 
 namespace Simulation.Entities.Facilities;
 
@@ -23,5 +24,17 @@ public abstract class Facility : Actor
     public virtual void FinishDay()
     {
         
+    }
+
+    public List<string> ToStringList(int index)
+    {
+        return new List<string>()
+        {
+            index.ToString(),
+            Name,
+            Owner.Name,
+            Ceo.Name,
+            RuTranslator.GetName(GetType())
+        };
     }
 }
