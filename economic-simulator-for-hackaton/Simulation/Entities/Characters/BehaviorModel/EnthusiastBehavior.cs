@@ -191,7 +191,7 @@ public class EnthusiastBehavior : IBehavior
     {
         facility.moneyBalance = me.moneyBalance;
         me.moneyBalance = 0;
-        var myCargos = station.cargos.Where(cargo => cargo.Owner == me);
+        var myCargos = station.cargos.Where(cargo => cargo.Owner == me && cargo.Quantity > 0);
         foreach (var cargo in myCargos)
         {
             cargo.Owner = facility;

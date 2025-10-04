@@ -98,7 +98,7 @@ public static class StarterUp
         newFacility.Owner = Owner;
         newFacility.Place = station;
 
-        newFacility.Name = name ?? GenarateFacilityName(newFacility);
+        newFacility.Name = name ?? GenerateFacilityName(newFacility);
 
         item.Quantity --;
         if (item.Quantity == 0)
@@ -145,7 +145,7 @@ public static class StarterUp
         return true;
     }
 
-    public static string GenarateFacilityName(Facility facility)
+    public static string GenerateFacilityName(Facility facility)
     {
         return "some facility";
     }

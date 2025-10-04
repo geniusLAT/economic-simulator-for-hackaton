@@ -361,4 +361,95 @@ public class DoTests
         Assert.That(station.facilities.Last().Owner, Is.EqualTo(enthusiast));
         Assert.That(station.facilities.Last() is MiningCombine);
     }
+
+    [Test]
+    public async Task Do_ALofOfEnthusiastsCreatesProductionLine()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II",
+            MaxLevelOfMining = 30,
+            MaxLevelOfFuel = 1
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        for (int i = 0; i < 4; i++)
+        {
+            var enthusiast = new Character()
+            {
+                Name = $"enthusiast {i}",
+                Behavior = new EnthusiastBehavior(),
+                Place = station,
+                moneyBalance = 500
+            };
+            _simulator.Characters.Add(enthusiast);
+        }
+
+        var seller = new Character()
+        {
+            Name = "seller I",
+            Behavior = new StupidSellerBehavior(),
+            Place = station
+        };
+        _simulator.Characters.Add(seller);
+
+        var cargo = new Item()
+        {
+            Owner = seller,
+            Type = ItemType.fuelProducingEquipment,
+            Quantity = 1
+        };
+        cargo.TransitToNewLocation(null, station);
+
+        var uselessCargo = new Item()
+        {
+            Owner = seller,
+            Type = ItemType.miningEquipment,
+            Quantity = 1
+        };
+        uselessCargo.TransitToNewLocation(null, station);
+
+        var anotherCargo = new Item()
+        {
+            Owner = seller,
+            Type = ItemType.meltingEquipment,
+            Quantity = 1
+        };
+        anotherCargo.TransitToNewLocation(null, station);
+
+        var buyer = new Character()
+        {
+            Name = "buyer I",
+            Behavior = new StupidBuyerBehavior()
+            { TypeToBuy = ItemType.metal},
+            Place = station,
+            moneyBalance = 1000
+        };
+        _simulator.Characters.Add(buyer);
+
+        var speculator = new Character()
+        {
+            Name = "speculator I",
+            Behavior = new SpeculatorBehavior(),
+            Place = station,
+            moneyBalance = 500
+        };
+        _simulator.Characters.Add(speculator);
+
+        //Act       
+        await _simulator.SkipDays(80);
+
+
+        Console.WriteLine(station.CargoView());
+        //Assert
+        Assert.That(station.cargos.Where(
+            cargo => cargo.Owner == buyer)
+            .FirstOrDefault()?
+            .Quantity ?? 0, 
+            Is.Positive);
+    }
 }
