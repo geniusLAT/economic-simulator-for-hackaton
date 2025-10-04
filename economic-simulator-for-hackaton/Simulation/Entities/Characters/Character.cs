@@ -1,4 +1,5 @@
 ﻿using Simulation.Entities.Characters.BehaviorModel;
+using Simulation.Entities.Facilities;
 using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
 
