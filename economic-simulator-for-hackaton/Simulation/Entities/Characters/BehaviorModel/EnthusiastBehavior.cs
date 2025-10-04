@@ -1,6 +1,7 @@
 ﻿using Simulation.Entities.Facilities;
 using Simulation.Entities.Facilities.Facilities;
 using Simulation.Entities.Locations;
+using Simulation.Utilities;
 
 namespace Simulation.Entities.Characters.BehaviorModel;
 
@@ -77,11 +78,79 @@ public class EnthusiastBehavior : IBehavior
                 MyFacility =  StarterUp.StartUp(me, type, me, cargo, $"{me.Name}'s facility");
                 if (MyFacility is not null)
                 {
+                    MyFacility.Name = ChooseFacilityName(MyFacility, me);
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public string ChooseFacilityName(Facility facility, Character me)
+    {
+        var type = facility.GetType();
+        var word = RuTranslator.GetName(type);
+
+        var pseudoRandom = (long)(me.moneyBalance + me.Place?.coordX ?? 0);
+        if (pseudoRandom < 0)
+        {
+            pseudoRandom = 0;
+        }
+        string candidateName = "";
+        switch (pseudoRandom % 9)
+        {
+            case 0:
+                candidateName = $"{word} <<{me.Place!.Name}>>";
+                break;
+            case 1:
+                candidateName = NameVariator
+                    .NameVariations[(int)pseudoRandom%NameVariator.NameVariations.Count]; 
+                break;
+            case 2:
+                candidateName = $"{word} <<{NameVariator
+                    .NameVariations[(int)pseudoRandom % NameVariator.NameVariations.Count]}>>";
+                break;
+            case 3:
+                candidateName = NameVariator
+                    .SovietWaveNameVariations[(int)pseudoRandom % NameVariator.SovietWaveNameVariations.Count];
+                break;
+            case 4:
+                candidateName = $"{word} <<{NameVariator
+                    .SovietWaveNameVariations[(int)pseudoRandom % NameVariator.SovietWaveNameVariations.Count]}>>";
+                break;
+            case 5:
+                candidateName = $"{word} <<{NameVariator
+                    .SovietWaveNameVariations[
+                    (int)pseudoRandom % NameVariator.SovietWaveNameVariations.Count]}-{
+                    (pseudoRandom % 85) + 10}>>";
+                break;
+            case 6:
+                candidateName = $"{word} <<{NameVariator
+                    .JapaneseNameVariations[
+                    (int)pseudoRandom % NameVariator.JapaneseNameVariations.Count]}-{
+                    (pseudoRandom % 85) + 10}>>";
+                break;
+            case 7:
+                candidateName =  $"{word} <<{NameVariator
+                    .JapaneseNameVariations[
+                    (int)pseudoRandom % NameVariator.JapaneseNameVariations.Count]}>>";
+                break;
+            case 8:
+                candidateName = NameVariator
+                    .JapaneseNameVariations[
+                    (int)pseudoRandom % NameVariator.JapaneseNameVariations.Count];
+                break;
+            default:
+                break;
+        }
+
+        var count = (me.Place as SpaceStation).facilities.Count;
+        if( count > 0)
+        {
+            candidateName += " " + RomanNumeralConverter.ToRoman(count);
+        }
+
+        return candidateName;
     }
 
     public bool BuySomethingForStartingUp(Character me, SpaceStation station)
