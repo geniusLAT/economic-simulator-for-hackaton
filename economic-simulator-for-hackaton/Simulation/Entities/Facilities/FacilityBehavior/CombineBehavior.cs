@@ -252,11 +252,22 @@ public abstract class CombineBehavior : IFacilityBehavior
         FindOutWhatCanBeProducedToday(producingFacility, station);
         RecalculateAllProfit(producingFacility);
         producingFacility.Recipes.Sort();
-        var chosenRecipe = producingFacility.Recipes.LastOrDefault();
+        var chosenRecipe = producingFacility.Recipes.FirstOrDefault();
         if (chosenRecipe is null || chosenRecipe.canProduceToday < 1)
-        { 
+        {
+            Console.WriteLine($"{facility.Name} chose not to produce at all");
+            if (chosenRecipe is null)
+            {
+                Console.WriteLine($"No Recipe");
+                return;
+            }
+            if(chosenRecipe.canProduceToday < 1)
+            {
+                Console.WriteLine($"can not produce {chosenRecipe.ItemType}");
+            }
             return;
         }
+        Console.WriteLine($"{facility.Name} chose to produce {chosenRecipe.ItemType}");
         ManageProduction(producingFacility, chosenRecipe);
         ManageSelling(producingFacility, station, chosenRecipe);
     }
@@ -264,7 +275,9 @@ public abstract class CombineBehavior : IFacilityBehavior
     public void ManageSelling(ProducingFacility facility, SpaceStation station, ProductionRecipe recipe)
     {
         var productionSellingOffer = recipe.OfferToBuyProduced ?? (from offer in station.localOffers
-                                      where offer.Offerer == facility && offer.IsOffererSelling
+                                      where offer.Offerer == facility 
+                                      && offer.IsOffererSelling
+                                      && offer.ItemType == recipe.ItemType
                                       select offer
                                       ).FirstOrDefault();
 

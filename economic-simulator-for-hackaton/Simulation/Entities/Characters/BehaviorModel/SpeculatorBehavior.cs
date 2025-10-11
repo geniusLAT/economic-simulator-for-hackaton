@@ -156,28 +156,33 @@ public class SpeculatorBehavior : IBehavior
                 if (offer.IsOffererSelling && option.OfferForSpeculatorToBuy is not null)
                 {
                     //if speculator can buy cheaper he buy cheaper
-                    if(option.OfferForSpeculatorToBuy.pricePerOne < offer.pricePerOne)
+                    if (option.OfferForSpeculatorToBuy.pricePerOne > offer.pricePerOne)
                     {
+                        //Console.WriteLine($"if speculator can buy cheaper he buy cheaper {option.OfferForSpeculatorToSell.pricePerOne} < {offer.pricePerOne}");
                         option.OfferForSpeculatorToBuy = offer;
                     }
                 }
                 if (offer.IsOffererSelling && option.OfferForSpeculatorToBuy is null)
                 {
                     //first found offer to buy
+                    //Console.WriteLine($"first found offer to buy {offer.pricePerOne}");
                     option.OfferForSpeculatorToBuy = offer;
                 }
 
                 if (!offer.IsOffererSelling && option.OfferForSpeculatorToSell is not null)
                 {
+                    //Console.WriteLine($"speculator is not interested (old price {option.OfferForSpeculatorToSell.pricePerOne} new price {offer.pricePerOne} )");
                     //if speculator can sell more expensive he sell more expensive
-                    if (option.OfferForSpeculatorToSell.pricePerOne > offer.pricePerOne)
+                    if (option.OfferForSpeculatorToSell.pricePerOne < offer.pricePerOne)
                     {
+                        //Console.WriteLine($"speculator can sell more expensive he sell more expensive {option.OfferForSpeculatorToSell.pricePerOne} > {offer.pricePerOne}");
                         option.OfferForSpeculatorToSell = offer;
                     }
                 }
                 if (!offer.IsOffererSelling && option.OfferForSpeculatorToSell is null)
                 {
                     //first found offer to sell
+                    //Console.WriteLine($"first found offer to sell {offer.pricePerOne}");
                     option.OfferForSpeculatorToSell = offer;
                 }
             }
@@ -194,10 +199,10 @@ public class SpeculatorBehavior : IBehavior
         .OrderByDescending(theOption => theOption.Contrast)
         .FirstOrDefault();
 
-        //Console.WriteLine($"total: {options.Count}");
-        //Console.WriteLine($"contrast: {options.Where(theOption => theOption.Contrast is not null).Count()}");
-        //Console.WriteLine($"enough money: {options.Where(theOption => theOption.Contrast is not null)
-        //.Where(theOption => theOption.OfferForSpeculatorToBuy!.pricePerOne <= me.moneyBalance).Count()}");
+        Console.WriteLine($"total: {options.Count}");
+        Console.WriteLine($"contrast: {options.Where(theOption => theOption.Contrast is not null).Count()}");
+        Console.WriteLine($"enough money: {options.Where(theOption => theOption.Contrast is not null)
+        .Where(theOption => theOption.OfferForSpeculatorToBuy!.pricePerOne <= me.moneyBalance).Count()}");
 
         if (bestOption is not null)
         {

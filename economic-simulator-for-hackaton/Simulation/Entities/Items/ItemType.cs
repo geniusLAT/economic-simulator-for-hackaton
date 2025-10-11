@@ -9,5 +9,6 @@ public enum ItemType
     miningEquipment,
     fuelProducingEquipment,
     farmingEquipment,
-    meltingEquipment
+    meltingEquipment,
+    machineryProducingEquipment
 }

@@ -47,6 +47,9 @@ public class CeoBehavior : IBehavior
             case MeltingCombine combine:
                 combine.Behavior = new MeltingCombineBehavior();
                 return true;
+            case MachineryCombine combine:
+                combine.Behavior = new MachineryCombineBehavior();
+                return true;
             default:
                 return false;
         }

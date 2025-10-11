@@ -30,6 +30,8 @@ public class Item
                 return "Фермерское оборудование";
             case ItemType.meltingEquipment:
                 return "Плавильное оборудование";
+            case ItemType.machineryProducingEquipment:
+                return "Машиностроительное оборудование";
             default:
                 return "Нечто";
         }

@@ -14,6 +14,7 @@ public static class StarterUp
         { typeof(MiningCombine), ItemType.miningEquipment },
         { typeof(FuelCombine), ItemType.fuelProducingEquipment }, 
         { typeof(FoodCombine), ItemType.farmingEquipment }, 
+        { typeof(MachineryCombine), ItemType.machineryProducingEquipment }, 
         { typeof(MeltingCombine), ItemType.meltingEquipment }
     };
 

@@ -165,7 +165,8 @@ public class DoTests
             Name = "Joe Doe",
             Behavior = new StupidBuyerBehavior()
             { TypeToBuy = ItemType.food },
-            Place = station
+            Place = station,
+            moneyBalance = 500
         };
 
         _simulator.Characters.Add(character);
@@ -192,6 +193,68 @@ public class DoTests
         ExpectedSecondPrice -= ExpectedSecondPrice * 0.1f;
         Console.WriteLine($"Expected second price change: {ExpectedSecondPrice}");
         Assert.That(secondPrice, Is.EqualTo(ExpectedSecondPrice));
+    }
+
+    [Test]
+    public async Task Do_ChoosingBestDeal()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        for (int i = 0; i < 2; i++)
+        {
+            var character = new Character()
+            {
+                Name = $"Linda {i+1}",
+                Behavior = new StupidBuyerBehavior()
+                { TypeToBuy = ItemType.food, StartPrice = (i+1)*100 },
+                Place = station,
+                moneyBalance = 500*(i+1)
+            };
+
+            _simulator.Characters.Add(character);
+        }
+
+
+        var seller = new Character()
+        {
+            Name = "Fred",
+            Behavior = new StupidSellerBehavior(),
+            Place = station
+        };
+
+        _simulator.Characters.Add(seller);
+
+        var Cargo = new Item()
+        {
+            Owner = seller,
+            Type = ItemType.food,
+            Quantity = 500
+
+        };
+        station.cargos.Add(Cargo);
+
+        var speculator = new Character()
+        {
+            Name = "German",
+            Behavior = new SpeculatorBehavior(),
+            Place = station,
+            moneyBalance = 50000
+        };
+
+        _simulator.Characters.Add(speculator);
+
+        //Act
+       await _simulator.SkipDays(10);
+
+        Console.WriteLine($"{station.CargoView()}  \n {station.OfferView()}");
     }
 
     [Test]

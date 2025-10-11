@@ -32,6 +32,20 @@ public class ProductionRecipe : IComparable<ProductionRecipe>
     {
         if (other is null) return 1;
 
+        //prefer to produce then not to produce
+        if (canProduceToday < 1)
+        {
+            Console.WriteLine($"comparing {ItemType}, can not produce");
+            return 1;
+        }
+        Console.WriteLine($"comparing {ItemType}, {canProduceToday}");
+
+        if (other.canProduceToday < 1)
+        {
+            Console.WriteLine($"compared {other.ItemType}, {other.canProduceToday}");
+            return -1;
+        }
+
         if (OfferToBuyProduced is null && other.OfferToBuyProduced is null)
         {
             //if nothing was sold before sell one that can be made in bigger amount
@@ -47,6 +61,7 @@ public class ProductionRecipe : IComparable<ProductionRecipe>
         {
             return -1;
         }
+
         //prefer more profit
         return other.Profit
             .CompareTo(Profit);

@@ -9,6 +9,8 @@ public class StupidBuyerBehavior : IBehavior
 
     public ItemType TypeToBuy;
 
+    public float StartPrice = 1f;
+
     public void Do(Character me)
     {
         Console.WriteLine("Stupid buyer here");
@@ -29,17 +31,12 @@ public class StupidBuyerBehavior : IBehavior
             return;
         }
 
-        var price = 1f;
-        //if (me.moneyBalance > 0)
-        //{
-        //    price = me.moneyBalance / 2;
-        //}
         var offer = new Offer() 
         {
             Offerer = me,
             ItemType = TypeToBuy,
             IsOffererSelling = false,
-            pricePerOne = price,
+            pricePerOne = StartPrice,
             PriceBorder = me.moneyBalance,
             QuantityBorder = null
         };
