@@ -1,4 +1,5 @@
-﻿using Simulation.Entities.Items;
+﻿using Simulation.Entities.Facilities.FacilityBehavior;
+using Simulation.Entities.Items;
 
 namespace Simulation.Entities.Facilities.Facilities;
 
@@ -15,6 +16,23 @@ public class MeltingCombine : ProducingFacility, IScaleableFacility
     public const uint FuelPerProduce = 1;
 
     public const uint OrePerProduce = 3;
+
+    public override List<ProductionRecipe> Recipes { get; set; } = [
+        new()
+        {
+            ItemType = ItemType.metal,
+            requiredMaterials = [
+                new(){
+                    ItemType = ItemType.fuel,
+                    Quantity = 1
+                },
+                 new(){
+                    ItemType = ItemType.ore,
+                    Quantity = 3
+                }
+                ]
+        }
+        ];
 
     public override bool Produce(uint quantity)
     {
