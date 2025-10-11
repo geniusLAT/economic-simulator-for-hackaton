@@ -7,15 +7,31 @@ namespace Simulation.Entities.Facilities.FacilityBehavior;
 
 public abstract class CombineBehavior : IFacilityBehavior
 {
-    public List<StoredRawMaterial> Materials { get; set; } = [];
+    public List<StoredRawMaterial>? Materials { get; set; }
 
-    public virtual uint CountRawMaterialsForProducing(Facility facility)
+    public virtual uint CountRawMaterialsForProducing(ProducingFacility facility, ProductionRecipe recipe)
     {
         Console.WriteLine("CountRawMaterialsForProducing");
-        uint count = uint.MaxValue;
-        
-        foreach (StoredRawMaterial material in Materials)
+
+        if (Materials is null)
         {
+            return 0;
+        }
+
+        uint count = uint.MaxValue;
+
+        var requiredStoredMaterials = Materials
+            .Where(material => recipe.requiredMaterials
+            .Any(r => r.ItemType == material.ItemType));
+
+        foreach (StoredRawMaterial material in requiredStoredMaterials)
+        {
+
+            //Looks unaccurate, TODO make it dictionary
+            var recipeReq = recipe.requiredMaterials
+                .Where(m => m.ItemType == material.ItemType)
+                .FirstOrDefault()!;
+
             var storedMaterial = facility.Place.cargos
             .Where(cargo => cargo.Owner == facility)
             .Where(cargo => cargo.Type == material.ItemType)
@@ -26,7 +42,7 @@ public abstract class CombineBehavior : IFacilityBehavior
                 return 0;
             }
 
-            var materialEnoughFor = storedMaterial.Quantity / material.NeededPerProduction;
+            var materialEnoughFor = storedMaterial.Quantity / recipeReq.Quantity;
             if (count > materialEnoughFor)
             {
                 count = (uint)materialEnoughFor;
@@ -38,8 +54,46 @@ public abstract class CombineBehavior : IFacilityBehavior
         return count;
     }
 
+    public virtual List<StoredRawMaterial> FillMaterialsList(Facility facility)
+    {
+        var prodFacility = facility as ProducingFacility;
+
+        if (prodFacility is null)
+        {
+            return [];
+        }
+        var result = new List<StoredRawMaterial>();
+
+        foreach (var recipe in prodFacility.Recipes)
+        {
+            foreach( var neededMaterial in recipe.requiredMaterials)
+            {
+                var storedThat = result
+                    .Where(stored => stored.ItemType == neededMaterial.ItemType)
+                    .FirstOrDefault();
+
+                if( storedThat is null)
+                {
+                    result.Add(new() 
+                    {
+                        ItemType = neededMaterial.ItemType,
+                        NeededPerProduction = neededMaterial.Quantity
+                    }
+                    );
+                }
+            }
+        }
+
+        return result;
+    }
+
     public virtual bool BuyRawMaterial(Facility facility)
     {
+        if (Materials is null)
+        {
+            Materials = FillMaterialsList(facility);
+        }
+
         foreach (StoredRawMaterial material in Materials)
         {
             var materialOffer = facility.myOffers
@@ -138,6 +192,53 @@ public abstract class CombineBehavior : IFacilityBehavior
         ScaleUpCheck(facility);
     }
 
+    public virtual void FindOutWhatCanBeProducedToday(ProducingFacility facility, SpaceStation station)
+    {
+        foreach (var recipe in facility.Recipes)
+        {
+            var product = recipe.OfferToBuyProduced?.ItemToSell;
+
+            if (product is null)
+            {
+                product = (from cargo in station.cargos
+                               where cargo.Owner == facility && cargo.Type == recipe.ItemType
+                               select cargo).FirstOrDefault();
+
+                if (recipe.OfferToBuyProduced is not null)
+                {
+                    recipe.OfferToBuyProduced.ItemToSell = product;
+                }
+            }
+            
+            var canProduce = (uint)1;
+            var scaleableFacility = facility as IScaleableFacility;
+            if (scaleableFacility is not null)
+            {
+                recipe.MustBeStored = 3 * scaleableFacility.Level;
+                canProduce = scaleableFacility.Level;
+            }
+            canProduce = Math.Min(canProduce, CountRawMaterialsForProducing(facility, recipe));
+
+            var wantToProduce = recipe.MustBeStored - (product?.Quantity ?? 0);
+            if (wantToProduce < 0) wantToProduce = 0;
+
+            var producingToday = Math.Min(wantToProduce, canProduce);
+            recipe.canProduceToday = producingToday;
+
+            Console.WriteLine($"{facility.Name} can produce {canProduce}, " +
+            $"wanna produce {wantToProduce}, " +
+            $"may produce {producingToday}");
+        }
+    }
+
+    public void RecalculateAllProfit(ProducingFacility facility)
+    {
+        foreach (var recipe in facility.Recipes)
+        {
+            recipe.CalculateProfit();
+        }
+    }
+
     //TODO rewrite it. It should check what we can produce, 
     // then find out what is the best thing to produce
     //then produce it and put selling offer
@@ -148,42 +249,31 @@ public abstract class CombineBehavior : IFacilityBehavior
         {
             return;
         }
-        var ItemToSell = (from cargo in station.cargos
-                          where cargo.Owner == facility && cargo.Type == producingFacility.TypeOfProduct
-                          select cargo).FirstOrDefault();
-
-        var mustBeStored = (uint)3;
-        var canProduce = (uint)1;
-        var scaleableFacility = facility as IScaleableFacility;
-        if (scaleableFacility is not null)
-        {
-            mustBeStored = 3 * scaleableFacility.Level;
-            canProduce = scaleableFacility.Level;
+        FindOutWhatCanBeProducedToday(producingFacility, station);
+        RecalculateAllProfit(producingFacility);
+        producingFacility.Recipes.Sort();
+        var chosenRecipe = producingFacility.Recipes.LastOrDefault();
+        if (chosenRecipe is null || chosenRecipe.canProduceToday < 1)
+        { 
+            return;
         }
-        canProduce = Math.Min(canProduce, CountRawMaterialsForProducing(facility));
+        ManageProduction(producingFacility, chosenRecipe);
+        ManageSelling(producingFacility, station, chosenRecipe);
+    }
 
-        var wantToProduce = mustBeStored - (ItemToSell?.Quantity ?? 0);
-        if (wantToProduce < 0) wantToProduce = 0;
-
-        var producingToday = Math.Min(wantToProduce, canProduce);
-        Console.WriteLine($"{facility.Name} can produce {canProduce}, " +
-            $"wanna produce {wantToProduce}, " +
-            $"will produce {producingToday}");
-        ManageProduction(producingFacility, producingToday);
-
-        var productionSellingOffer = (from offer in station.localOffers
+    public void ManageSelling(ProducingFacility facility, SpaceStation station, ProductionRecipe recipe)
+    {
+        var productionSellingOffer = recipe.OfferToBuyProduced ?? (from offer in station.localOffers
                                       where offer.Offerer == facility && offer.IsOffererSelling
                                       select offer
                                       ).FirstOrDefault();
 
         if (productionSellingOffer is null)
         {
-            if (ItemToSell is null)
-            {
-                ItemToSell = (from cargo in station.cargos
-                              where cargo.Owner == facility && cargo.Type == producingFacility.TypeOfProduct
+           
+           var ItemToSell = (from cargo in station.cargos
+                              where cargo.Owner == facility && cargo.Type == recipe.ItemType
                               select cargo).FirstOrDefault();
-            }
 
             if (ItemToSell is null)
             {
@@ -194,21 +284,21 @@ public abstract class CombineBehavior : IFacilityBehavior
             var price = 1f;
             if (facility.moneyBalance > 0)
             {
-                price = facility.moneyBalance / mustBeStored;
+                price = facility.moneyBalance / recipe.MustBeStored;
                 Console.WriteLine($"start price {price}");
             }
             productionSellingOffer = new Offer()
             {
-                Offerer = producingFacility,
+                Offerer = facility,
                 IsOffererSelling = true,
                 ItemToSell = ItemToSell,
-                ItemType = producingFacility.TypeOfProduct,
+                ItemType = ItemToSell.Type,
                 QuantityBorder = ItemToSell.Quantity,
                 PriceBorder = 1,
                 pricePerOne = price,
                 HaveToMoveQuantityBorder = true
             };
-
+            recipe.OfferToBuyProduced = productionSellingOffer;
             facility.Ceo!.PublishOffer(productionSellingOffer);
         }
         else
@@ -217,35 +307,41 @@ public abstract class CombineBehavior : IFacilityBehavior
             if (productionSellingOffer.ItemToSell is null)
             {
                 productionSellingOffer.ItemToSell = (from cargo in station.cargos
-                                                     where cargo.Owner == facility && cargo.Type == producingFacility.TypeOfProduct
+                                                     where cargo.Owner == facility && cargo.Type == recipe.ItemType
                                                      select cargo).FirstOrDefault();
             }
             productionSellingOffer.QuantityBorder = productionSellingOffer.ItemToSell?.Quantity ?? 0;
         }
-        productionSellingOffer.PriceBorder = CalculateUnitCost();
+        productionSellingOffer.PriceBorder = CalculateUnitCost(recipe);
     }
 
-    public virtual float CalculateUnitCost()
+    public virtual float CalculateUnitCost(ProductionRecipe recipe)
     {
+        var requiredStoredMaterials = Materials!
+           .Where(material => recipe.requiredMaterials
+           .Any(r => r.ItemType == material.ItemType));
+
         var UnitCost = 0f;
-        foreach (var material in Materials)
+        foreach (var material in requiredStoredMaterials)
         {
             Console.WriteLine($"{material.ItemType} unit cost is {material.CostPrice * material.NeededPerProduction}");
             UnitCost += material.CostPrice * material.NeededPerProduction;
         }
         Console.WriteLine($"total unit cost is {UnitCost}");
+        recipe.UnitCost = UnitCost;
+        recipe.OfferToBuyProduced!.PriceBorder = UnitCost;
         return UnitCost;
     }
 
-    public virtual void ManageProduction(ProducingFacility producingFacility, uint producingToday)
+    public virtual void ManageProduction(ProducingFacility producingFacility, ProductionRecipe recipe)
     {
-        if (!producingFacility.Produce(producingToday))
+        if (!producingFacility.Produce(recipe.canProduceToday, recipe.ItemType))
         {
             return;
         }
-        foreach (var material in Materials)
+        foreach (var material in Materials!)
         {
-            var spentMaterials = producingToday * material.NeededPerProduction;
+            var spentMaterials = recipe.canProduceToday * material.NeededPerProduction;
             if (spentMaterials > material.StoredUnits)
             {
                 material.StoredUnits = 0;
