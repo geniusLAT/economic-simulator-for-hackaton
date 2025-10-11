@@ -16,7 +16,7 @@ public class ProductionRecipe : IComparable<ProductionRecipe>
 
     public float Profit { get; set; } = 0;
 
-    public uint mustBeStored { get; set; } = 3;
+    public uint MustBeStored { get; set; } = 3;
 
     public void CalculateProfit()
     {

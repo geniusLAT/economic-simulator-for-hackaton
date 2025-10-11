@@ -7,6 +7,8 @@ public sealed class MeltingCombineBehavior : CombineBehavior
 {
     public MeltingCombineBehavior()
     {
+        Materials = [];
+
         Materials.Add(new()
         {
             ItemType= ItemType.fuel,

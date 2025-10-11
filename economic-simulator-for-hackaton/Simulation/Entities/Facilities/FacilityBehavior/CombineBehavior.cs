@@ -329,7 +329,10 @@ public abstract class CombineBehavior : IFacilityBehavior
         }
         Console.WriteLine($"total unit cost is {UnitCost}");
         recipe.UnitCost = UnitCost;
-        recipe.OfferToBuyProduced!.PriceBorder = UnitCost;
+        if (recipe.OfferToBuyProduced is not null)
+        {
+            recipe.OfferToBuyProduced.PriceBorder = UnitCost;
+        }
         return UnitCost;
     }
 
