@@ -138,6 +138,9 @@ public abstract class CombineBehavior : IFacilityBehavior
         ScaleUpCheck(facility);
     }
 
+    //TODO rewrite it. It should check what we can produce, 
+    // then find out what is the best thing to produce
+    //then produce it and put selling offer
     public virtual void ProcessProduction(Facility facility, SpaceStation station)
     {
         var producingFacility = facility as ProducingFacility;
@@ -175,7 +178,6 @@ public abstract class CombineBehavior : IFacilityBehavior
 
         if (productionSellingOffer is null)
         {
-
             if (ItemToSell is null)
             {
                 ItemToSell = (from cargo in station.cargos
