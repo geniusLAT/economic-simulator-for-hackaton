@@ -5,9 +5,7 @@ namespace Simulation.Entities.Facilities;
 
 public abstract class ProducingFacility : Facility
 {
-    public List<ProductionRecipe> Recipes { get; set; } = [];
-
-    public virtual ItemType TypeOfProduct => ItemType.food;
+    public virtual List<ProductionRecipe> Recipes { get; set; } = [];
 
     public uint consecutiveFullCapacityDays { get; set; }
 
@@ -15,6 +13,17 @@ public abstract class ProducingFacility : Facility
 
     public virtual bool Produce(uint quantity, ItemType itemType)
     {
+        uint canProducePerDay = 1;
+        var scaleableFacility = this as IScaleableFacility;
+        if ( scaleableFacility is not null)
+        {
+            canProducePerDay = scaleableFacility.Level;   
+        }
+        if ( ProducedToday >= canProducePerDay)
+        {
+            return false;
+        }
+
         var recipe = Recipes.Where(recipe => recipe.ItemType == itemType).FirstOrDefault();
         if (recipe is null)
         {
