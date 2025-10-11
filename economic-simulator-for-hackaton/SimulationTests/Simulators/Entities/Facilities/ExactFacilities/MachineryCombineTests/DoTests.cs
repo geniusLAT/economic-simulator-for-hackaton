@@ -357,4 +357,110 @@ public class DoTests
 
         Assert.That(sellerCargos.Count(), Is.LessThan(3));
     }
+
+    [Test]
+    public async Task Do_CreatesViaEnthusiastsWholeProductionLine()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II",
+            IsSunny = true,
+            MaxLevelOfFuel = 5,
+            MaxLevelOfMining = 5
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var ceoBehavior = new CeoBehavior();
+
+        var character = new Character()
+        {
+            Name = "Joe Doe",
+            Behavior = ceoBehavior,
+            Place = station
+        };
+        _simulator.Characters.Add(character);
+
+        var machineryCombine = new MachineryCombine()
+        {
+            Name = "Zeus Machinery",
+            Place = station,
+            Ceo = character,
+            Owner = character,
+            moneyBalance = 500
+        };
+        ceoBehavior.myFacilities.Add(machineryCombine);
+        station.facilities.Add(machineryCombine);
+
+        var Seller = new Character()
+        {
+            Name = "Fred",
+            Behavior = new StupidSellerBehavior(),
+            Place = station
+        };
+        _simulator.Characters.Add(Seller);
+
+        var metal = new Item()
+        {
+            Type = ItemType.metal,
+            Owner = Seller,
+            Quantity = 200
+        };
+        station.cargos.Add(metal);
+
+        var fuel = new Item()
+        {
+            Type = ItemType.fuel,
+            Owner = Seller,
+            Quantity = 20
+        };
+        station.cargos.Add(fuel);
+
+        for (int i = 0; i < 2; i++)
+        {
+            var Buyer = new Character()
+            {
+                Name = $"Linda {i + 1}",
+                Behavior = new StupidBuyerBehavior()
+                { TypeToBuy = ItemType.food },
+                Place = station,
+                moneyBalance = 100000
+            };
+            _simulator.Characters.Add(Buyer);
+        }
+
+        for (int i = 0; i < 8; i++)
+        {
+            var Enthusiast = new Character()
+            {
+                Name = $"Enthusiast {i + 1}",
+                Behavior = new EnthusiastBehavior(),
+                Place = station,
+                moneyBalance = 100
+            };
+            _simulator.Characters.Add(Enthusiast);
+        }
+
+        var Speculator = new Character()
+        {
+            Name = "German",
+            Behavior = new SpeculatorBehavior(),
+            Place = station,
+            moneyBalance = 100000
+        };
+        _simulator.Characters.Add(Speculator);
+
+        //Act
+        await _simulator.SkipDays(400);
+
+        //Assert
+        Console.WriteLine(station.CargoView());
+        Console.WriteLine(station.View());
+        Assert.That(machineryCombine.Behavior, Is.Not.Null);
+        Assert.That(Seller.moneyBalance, Is.LessThan(100000));
+        Assert.That(Speculator.moneyBalance, Is.GreaterThan(100000));
+    }
 }
