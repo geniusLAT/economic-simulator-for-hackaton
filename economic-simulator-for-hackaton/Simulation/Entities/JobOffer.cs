@@ -21,4 +21,48 @@ public class JobOffer
     {
         Done = true;
     }
+
+    public float UpdatePrice()
+    {
+        Console.WriteLine($"Job offer of {Offerer.Name}  is updating salary");
+      
+        if (Frozen)
+        {
+            Console.WriteLine($"Job offer is frozen and must not be updated");
+            return Salary;
+        }
+        
+        if (Offerer.moneyBalance < SalaryBorder * WorkersNeeded)
+        {
+            SalaryBorder = SalaryBorder * WorkersNeeded;
+        }
+
+        if (!Done)
+        {
+
+            Salary += Salary * 0.1f;
+            if (Salary == 0)
+            {
+                Salary = 0.01f;
+            }
+
+            if (Salary > SalaryBorder)
+            {
+                Console.WriteLine($"salary {Salary} is on border {SalaryBorder} ");
+                Salary = SalaryBorder;
+            }
+            Done = false;
+            Console.WriteLine($"salary is upper: {Salary}");
+            return Salary;
+        }
+        else
+        {
+            Salary -= Salary * 0.1f;
+            Done = false;
+            Console.WriteLine($"salary is lower: {Salary}");
+            return Salary;
+        }
+        
+    }
+
 }

@@ -25,14 +25,15 @@ public sealed class StupidRecruitingBehavior : IFacilityBehavior
             {
                 Offerer = recriter,
                 Salary = 1,
-                SalaryBorder = recriter.moneyBalance,
+                SalaryBorder = recriter.moneyBalance / 5,
                 WorkersNeeded = 5
             };
             station.JobOffers.Add(recriter.JobOffer);
         }
         else
         {
-            recriter.JobOffer.SalaryBorder = recriter.moneyBalance;
+            recriter.JobOffer.SalaryBorder = recriter.moneyBalance / 5;
+            recriter.JobOffer.UpdatePrice();
         }
     }
 }

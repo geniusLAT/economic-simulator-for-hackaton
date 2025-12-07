@@ -172,6 +172,8 @@ public class SpaceStation : Location
 
             actualContract.Offerer.moneyBalance -= moneyToPay;
 
+            actualContract.Accept();
+
             for (int i = 0; i < actualContract.WorkersNeeded; i++)
             {
                 var thatWorker = actualWorkers[0];
