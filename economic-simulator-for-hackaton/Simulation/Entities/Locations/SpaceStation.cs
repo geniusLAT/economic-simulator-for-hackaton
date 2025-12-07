@@ -1,4 +1,5 @@
-﻿using Simulation.Entities.Facilities;
+﻿using Simulation.Entities.Characters.BehaviorModel;
+using Simulation.Entities.Facilities;
 using Simulation.Utilities;
 
 namespace Simulation.Entities.Locations;
@@ -17,11 +18,14 @@ public class SpaceStation : Location
 
     public bool IsSunny { get; set; } = false;
 
+    public List<WorkerBehavior> Workers { get; set; } = [];
+
     public override string View()
     {
         var result = $"Станция называется {Name}, находится по координатам {coordX}, {coordY}\n";
         result += $"Уровень пригодности для добычи руды: {MaxLevelOfMining}\n";
         result += $"Уровень пригодности для добычи топлива: {MaxLevelOfFuel}\n";
+        result += $"Количество рабочих: {Workers.Count}\n";
         var SunnyString = "Нет";
         if (IsSunny)
         {
