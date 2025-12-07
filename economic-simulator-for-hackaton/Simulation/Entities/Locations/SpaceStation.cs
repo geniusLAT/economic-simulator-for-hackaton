@@ -1,4 +1,5 @@
-﻿using Simulation.Entities.Characters.BehaviorModel;
+﻿using Simulation.Entities.Characters;
+using Simulation.Entities.Characters.BehaviorModel;
 using Simulation.Entities.Facilities;
 using Simulation.Utilities;
 
@@ -18,7 +19,9 @@ public class SpaceStation : Location
 
     public bool IsSunny { get; set; } = false;
 
-    public List<WorkerBehavior> Workers { get; set; } = [];
+    public List<Character> Workers { get; set; } = [];
+
+    public List<JobOffer> JobOffers { get; set; } = [];
 
     public override string View()
     {
@@ -138,6 +141,43 @@ public class SpaceStation : Location
                 contrast = localContrast;
                 firstOffer = offer;
                 secondOffer = offer;
+            }
+        }
+    }
+
+    public void ProcessJobMarket()
+    {
+        var actualContracts = JobOffers
+            .Where(offer => !offer.Frozen)
+            .OrderByDescending(offer => offer.Salary)
+            .ToArray();
+
+        var actualWorkers = Workers.ToList();
+        Console.WriteLine($"station {Name} has {actualWorkers.Count} workers and {actualContracts.Count()} contracts");
+
+        foreach (var actualContract in actualContracts)
+        {
+            if (actualWorkers.Count < actualContract.WorkersNeeded)
+            {
+                Console.WriteLine($"{actualContract.Offerer} has not enough workers to hire");
+                continue;
+            }
+            var moneyToPay = actualContract.WorkersNeeded * actualContract.Salary;
+            if ( actualContract.Offerer.moneyBalance < moneyToPay)
+            {
+                Console.WriteLine($"{actualContract.Offerer} has not enough money to pay salary {actualContract.Salary} for each" +
+                    $" of {actualContract.WorkersNeeded} workers for contract");
+                continue;
+            }
+
+            actualContract.Offerer.moneyBalance -= moneyToPay;
+
+            for (int i = 0; i < actualContract.WorkersNeeded; i++)
+            {
+                var thatWorker = actualWorkers[0];
+                Console.WriteLine($"{thatWorker.Name} is working for {actualContract.Offerer.Name} and earns {actualContract.Salary}");
+                actualWorkers.Remove( thatWorker );
+                thatWorker.moneyBalance += actualContract.Salary;
             }
         }
     }

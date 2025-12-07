@@ -1,4 +1,5 @@
-﻿using Simulation.Entities.Characters;
+﻿using Simulation.Entities;
+using Simulation.Entities.Characters;
 using Simulation.Entities.Locations;
 
 namespace Simulation.Simulators;
@@ -40,6 +41,9 @@ public class Simulator
                var newPrice = offer.UpdatePrice();
                 Console.WriteLine($"new price is {newPrice}");
             }
+
+            station.ProcessJobMarket();
+
             foreach (var facility in station.facilities)
             {
                facility.FinishDay();

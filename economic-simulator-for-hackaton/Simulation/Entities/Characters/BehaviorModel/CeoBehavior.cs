@@ -50,6 +50,9 @@ public class CeoBehavior : IBehavior
             case MachineryCombine combine:
                 combine.Behavior = new MachineryCombineBehavior();
                 return true;
+            case StupidRecruiter combine:
+                combine.Behavior = new StupidRecruitingBehavior();
+                return true;
             default:
                 return false;
         }
