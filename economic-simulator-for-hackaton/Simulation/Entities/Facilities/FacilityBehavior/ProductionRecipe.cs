@@ -18,6 +18,10 @@ public class ProductionRecipe : IComparable<ProductionRecipe>
 
     public uint MustBeStored { get; set; } = 3;
 
+    public uint PlanToProduce { get; set; } = 0;
+
+    public List<JobOffer> Jobs { get; set; } = [];
+
     public void CalculateProfit()
     {
         Profit = -UnitCost;
