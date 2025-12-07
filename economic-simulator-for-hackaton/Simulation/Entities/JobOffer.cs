@@ -65,4 +65,15 @@ public class JobOffer
         
     }
 
+    public List<string> ToStringList(int index)
+    {
+        /////// "Номер","Зарплата","Автор предложения"
+        return new List<string>()
+        {
+            index.ToString(),
+            Salary.ToString(),
+            Offerer.Name,
+
+        };
+    }
 }

@@ -1,5 +1,7 @@
 ﻿using Simulation.Entities;
 using Simulation.Entities.Characters;
+using Simulation.Entities.Characters.BehaviorModel;
+using Simulation.Entities.Facilities;
 using Simulation.Entities.Facilities.Facilities;
 using Simulation.Entities.Items;
 using Simulation.Entities.Locations;
@@ -461,6 +463,81 @@ public class ProcessPromptTests
 |3    |Новое Имя|Joe Doe |Joe Doe |Рудоплавильный комбинат|
 |4    |Новое Имя|Joe Doe |Joe Doe |Топливный комбинат     |
 |5    |Новое Имя|Joe Doe |Joe Doe |Шахта                  |
+";
+        Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
+    }
+
+    [Test]
+    public async Task ProcessPrompt_PlayerJobOfferViewStationWithThreeJobOffers()
+    {
+        //Append
+        var station = new SpaceStation()
+        {
+            coordX = 0,
+            coordY = 0,
+            Name = "Zeus II"
+        };
+
+        _simulator.spaceStations.Add(station);
+
+        var pLayer = new PLayer()
+        {
+            Name = "Joe Doe",
+            Place = station
+        };
+
+        _simulator.Characters.Add(pLayer);
+        _simulator.PLayerCharacters.Add(pLayer);
+
+        var workers = new List<Character>();
+        for (int i = 0; i < 5; i++)
+        {
+            var worker = new Character()
+            {
+                Name = $"worker {i}",
+                moneyBalance = 0,
+                Behavior = new WorkerBehavior(),
+                Place = station
+            };
+            _simulator.Characters.Add(worker);
+            workers.Add(worker);
+        }
+        for (int i = 0; i < 3; i++)
+        {
+            var ceoBehavior = new CeoBehavior();
+            var ceo = new Character()
+            {
+                Name = $"CEO {i}",
+                moneyBalance = 0,
+                Behavior = ceoBehavior,
+                Place = station
+            };
+            _simulator.Characters.Add(ceo);
+
+            var recruiter = new StupidRecruiter()
+            {
+                Name = $"Hoof&Horns {i}",
+                Owner = ceo,
+                moneyBalance = 1000,
+                Place = station
+            };
+            station.facilities.Add(recruiter);
+            ceoBehavior.myFacilities.Add(recruiter);
+        }
+
+        //Act
+        await _simulator.SkipDays(2);
+        var result = await _playerPromptProcessor.ProcessPromptAsync("осмотр работа", pLayer.Guid);
+
+        //Assert
+        Console.WriteLine(result);
+
+        var expected = @"Открытых вакансий: 3
+|Номер|Зарплата|Автор предложения|
+|-----|--------|-----------------|
+|1    |0.9     |Hoof&Horns 0     |
+|2    |1.1     |Hoof&Horns 1     |
+|3    |1.1     |Hoof&Horns 2     |
 ";
         Assert.That(result, Is.EqualTo(expected.Replace("\r", "")));
     }

@@ -114,6 +114,29 @@ public class SpaceStation : Location
         return result + drawer.Draw(true);
     }
 
+    public string JobOfferView()
+    {
+        var result = $"Открытых вакансий: {JobOffers.Count}\n";
+        if (JobOffers.Count < 1)
+        {
+            return result;
+        }
+
+        var drawer = new TableDrawer();
+        drawer.AddLine(new List<string>() {
+            "Номер",
+        "Зарплата",
+        "Автор предложения"
+        });
+
+        for (int i = 0; i < JobOffers.Count; i++)
+        {
+            JobOffer? offer = JobOffers[i];
+            drawer.AddLine(offer.ToStringList(i + 1));
+        }
+        return result + drawer.Draw(true);
+    }
+
     public void SpeculatorSpawnCheck()
     {
         var offersToSell = (from offer in localOffers
@@ -159,13 +182,13 @@ public class SpaceStation : Location
         {
             if (actualWorkers.Count < actualContract.WorkersNeeded)
             {
-                Console.WriteLine($"{actualContract.Offerer} has not enough workers to hire");
+                Console.WriteLine($"{actualContract.Offerer.Name} has not enough workers to hire");
                 continue;
             }
             var moneyToPay = actualContract.WorkersNeeded * actualContract.Salary;
             if ( actualContract.Offerer.moneyBalance < moneyToPay)
             {
-                Console.WriteLine($"{actualContract.Offerer} has not enough money to pay salary {actualContract.Salary} for each" +
+                Console.WriteLine($"{actualContract.Offerer.Name} has not enough money to pay salary {actualContract.Salary} for each" +
                     $" of {actualContract.WorkersNeeded} workers for contract");
                 continue;
             }
